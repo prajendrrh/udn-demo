@@ -1,0 +1,7 @@
+# Namespace for VM + UDN + NetworkPolicy demo (OpenShift Virtualization).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: udn-vm-demo
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""

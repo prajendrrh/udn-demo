@@ -1,0 +1,26 @@
+# Namespaces that will share a ClusterUserDefinedNetwork.
+# All must have k8s.ovn.org/primary-user-defined-network="" at creation.
+# Optional label used by CUDN namespaceSelector (e.g. team=platform).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-platform-dev
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+    team: platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-platform-staging
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+    team: platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-platform-prod
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+    team: platform

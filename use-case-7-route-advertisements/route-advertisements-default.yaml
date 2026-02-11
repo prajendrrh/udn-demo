@@ -1,0 +1,18 @@
+# RouteAdvertisements: advertise default cluster network (pod subnets + EgressIPs) to the provider network.
+# Cluster-scoped; requires FRR + routeAdvertisements enabled on CNO and at least one FRRConfiguration
+# matching frrConfigurationSelector (e.g. receive-all with label routeAdvertisements: receive-all).
+# See: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/route-advertisements
+apiVersion: k8s.ovn.org/v1
+kind: RouteAdvertisements
+metadata:
+  name: default
+spec:
+  advertisements:
+    - PodNetwork
+    - EgressIP
+  networkSelectors:
+    - networkSelectionType: DefaultNetwork
+  frrConfigurationSelector:
+    matchLabels:
+      routeAdvertisements: receive-all
+  nodeSelector: {}

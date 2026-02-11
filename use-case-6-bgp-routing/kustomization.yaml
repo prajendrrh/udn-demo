@@ -1,0 +1,7 @@
+# Use case 6: BGP routing (FRR-K8s / FRRConfiguration)
+# 1. Enable BGP on the cluster (see README).
+# 2. Create namespace and apply FRRConfiguration (replace placeholders first).
+resources:
+  - namespace.yaml
+  # Edit frrconfiguration-example.yaml with your BGP peer IPs, ASNs, and prefixes before applying
+  - frrconfiguration-example.yaml

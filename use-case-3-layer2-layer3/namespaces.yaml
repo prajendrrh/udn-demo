@@ -1,0 +1,14 @@
+# Namespaces for Layer2 vs Layer3 UDN comparison.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: udn-layer2-demo
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: udn-layer3-demo
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""

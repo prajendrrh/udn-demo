@@ -1,0 +1,23 @@
+# Base FRRConfiguration for route advertisements: defines BGP peer and accepts routes from it.
+# RouteAdvertisements CRs reference this via frrConfigurationSelector (matchLabels routeAdvertisements: receive-all).
+# OVN-Kubernetes then generates additional FRRConfiguration objects to advertise pod/CUDN prefixes.
+# Replace neighbor address (e.g. 172.18.0.5) with your route reflector or BGP peer IP.
+# See: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/route-advertisements
+apiVersion: frrk8s.metallb.io/v1beta1
+kind: FRRConfiguration
+metadata:
+  name: receive-all
+  namespace: openshift-frr-k8s
+  labels:
+    routeAdvertisements: receive-all
+spec:
+  bgp:
+    routers:
+      - asn: 64512
+        neighbors:
+          - address: 172.18.0.5
+            asn: 64512
+            disableMP: true
+            toReceive:
+              allowed:
+                mode: all

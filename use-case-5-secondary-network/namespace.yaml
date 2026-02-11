@@ -1,0 +1,6 @@
+# Namespace for secondary network demo.
+# No UDN label: pods use the default cluster network as primary and attach a secondary via NAD.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: secondary-net-demo

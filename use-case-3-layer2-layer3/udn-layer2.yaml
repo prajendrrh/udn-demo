@@ -1,0 +1,15 @@
+# Layer2 UDN: single logical switch shared by all nodes.
+# All pods get IPs from the same subnet; good for broadcast/L2 semantics and VM clustering.
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-layer2
+  namespace: udn-layer2-demo
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    subnets:
+      - "192.0.2.0/24"
+    ipam:
+      lifecycle: Persistent

@@ -1,0 +1,23 @@
+# RouteAdvertisements: advertise selected ClusterUserDefinedNetworks (CUDNs) to the provider network.
+# Add label export: "true" to CUDNs you want to advertise (e.g. oc label cudn <name> export=true
+# does not work on CR spec; add the label to the ClusterUserDefinedNetwork metadata when creating it).
+# OVN-Kubernetes generates FRRConfiguration objects per node/network with the CUDN subnets.
+# See: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/route-advertisements
+apiVersion: k8s.ovn.org/v1
+kind: RouteAdvertisements
+metadata:
+  name: advertise-cudns
+spec:
+  advertisements:
+    - PodNetwork
+    - EgressIP
+  networkSelectors:
+    - networkSelectionType: ClusterUserDefinedNetworks
+      clusterUserDefinedNetworkSelector:
+        networkSelector:
+          matchLabels:
+            export: "true"
+  frrConfigurationSelector:
+    matchLabels:
+      routeAdvertisements: receive-all
+  nodeSelector: {}

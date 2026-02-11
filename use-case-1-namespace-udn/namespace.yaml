@@ -1,0 +1,16 @@
+# Tenant A: isolated namespace with its own UDN
+# Label must be set at namespace creation (cannot be added later).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tenant-a
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+---
+# Tenant B: another isolated namespace with a different UDN
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tenant-b
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""

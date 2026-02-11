@@ -1,0 +1,6 @@
+# Namespace for FRRConfiguration CRs used by route advertisements.
+# Same as use-case-6; idempotent if already created.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-frr-k8s

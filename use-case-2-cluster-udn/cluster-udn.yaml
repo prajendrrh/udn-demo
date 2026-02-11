@@ -1,0 +1,19 @@
+# ClusterUserDefinedNetwork: shared L2 network across namespaces.
+# Only namespaces matching namespaceSelector get this network.
+# Cluster-admin required to create.
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: cudn-platform
+spec:
+  namespaceSelector:
+    matchLabels:
+      team: platform
+  network:
+    topology: Layer2
+    layer2:
+      role: Primary
+      subnets:
+        - "203.0.113.0/24"
+      ipam:
+        lifecycle: Persistent

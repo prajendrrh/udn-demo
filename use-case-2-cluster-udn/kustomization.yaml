@@ -1,0 +1,5 @@
+# Use case 2: ClusterUserDefinedNetwork (multi-namespace shared network)
+# Create namespaces first, then CUDN (cluster-admin for CUDN).
+resources:
+  - namespaces.yaml
+  - cluster-udn.yaml

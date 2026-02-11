@@ -1,0 +1,35 @@
+# Example FRRConfiguration for BGP routing (FRR-K8s).
+# Replace placeholder IPs, ASNs, and prefixes with your environment values.
+# BGP must be enabled first: oc patch Network.operator.openshift.io/cluster --type=merge -p '{"spec":{"additionalRoutingCapabilities":{"providers":["FRR"]}}}'
+#
+# Supported on bare metal. With MetalLB Operator, FRR-K8s is enabled automatically.
+# Ref: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/bgp-routing
+apiVersion: frrk8s.metallb.io/v1beta1
+kind: FRRConfiguration
+metadata:
+  name: bgp-demo
+  namespace: openshift-frr-k8s
+spec:
+  bgp:
+    routers:
+      - asn: 64512
+        prefixes:
+          - 192.168.2.0/24
+        neighbors:
+          - address: 172.30.0.3
+            asn: 4200000000
+            port: 179
+            ebgpMultiHop: true
+            # Optional: advertise only specific prefixes to this neighbor
+            # toAdvertise:
+            #   allowed:
+            #     prefixes:
+            #       - 192.168.2.0/24
+            # Optional: accept only specific prefixes from this neighbor
+            # toReceive:
+            #   allowed:
+            #     mode: all
+  # Optional: limit to specific nodes
+  # nodeSelector:
+  #   labelSelector:
+  #     node-role.kubernetes.io/worker: ""

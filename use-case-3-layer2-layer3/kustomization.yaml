@@ -1,0 +1,5 @@
+# Use case 3: Layer2 vs Layer3 UDN topologies
+resources:
+  - namespaces.yaml
+  - udn-layer2.yaml
+  - udn-layer3.yaml

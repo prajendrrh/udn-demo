@@ -1,0 +1,32 @@
+# Deployment that attaches to the secondary network.
+# Pods get eth0 (default) + net1 (secondary). Use k8s.v1.cni.cncf.io/networks annotation.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-with-secondary
+  namespace: secondary-net-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: with-secondary
+  template:
+    metadata:
+      labels:
+        app: with-secondary
+      annotations:
+        # Attach secondary network (same namespace: name only, or use namespace/name)
+        k8s.v1.cni.cncf.io/networks: secondary-net-demo/l2-secondary
+    spec:
+      containers:
+        - name: agnhost
+          image: registry.k8s.io/e2e-test-images/agnhost:2.45
+          args:
+            - pause
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

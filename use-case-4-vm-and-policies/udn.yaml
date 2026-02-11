@@ -1,0 +1,15 @@
+# UDN for VMs: deterministic IPs from a dedicated subnet.
+# VMs get stable IPs (Persistent IPAM) for clustering, backup agents, and monitoring.
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-vm
+  namespace: udn-vm-demo
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    subnets:
+      - "203.0.113.0/24"
+    ipam:
+      lifecycle: Persistent

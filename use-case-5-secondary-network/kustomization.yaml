@@ -1,0 +1,8 @@
+# Use case 5: Secondary network (NAD + pod attachment + optional MultiNetworkPolicy)
+# MultiNetworkPolicy requires cluster useMultiNetworkPolicy: true; exclude if not enabled.
+resources:
+  - namespace.yaml
+  - network-attachment-definition.yaml
+  - deployment-with-secondary.yaml
+  # Enable after: oc patch network.operator.openshift.io cluster --type=merge -p '{"spec":{"useMultiNetworkPolicy":true}}'
+  # - multi-network-policy-example.yaml

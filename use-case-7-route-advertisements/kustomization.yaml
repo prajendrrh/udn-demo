@@ -1,0 +1,10 @@
+# Use case 7: Route advertisements (default network + optional CUDN)
+# 1. Enable FRR and routeAdvertisements on CNO (see README).
+# 2. Apply FRRConfiguration first, then RouteAdvertisements.
+# 3. Edit frrconfiguration-receive-all.yaml: set neighbor address to your BGP peer/route reflector.
+resources:
+  - namespace.yaml
+  - frrconfiguration-receive-all.yaml
+  - route-advertisements-default.yaml
+  # Uncomment to also advertise CUDNs that have label export: "true"
+  # - route-advertisements-cudn-example.yaml

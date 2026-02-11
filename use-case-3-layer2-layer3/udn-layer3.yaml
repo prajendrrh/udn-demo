@@ -1,0 +1,14 @@
+# Layer3 UDN: one L2 segment per node, each with a different subnet; L3 routing between nodes.
+# Subnet is split into smaller per-node subnets; good for L3-only and scale.
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-layer3
+  namespace: udn-layer3-demo
+spec:
+  topology: Layer3
+  layer3:
+    role: Primary
+    subnets:
+      - cidr: "198.51.100.0/24"
+        hostSubnet: 24  # per-node subnet prefix; for IPv6 only /64 is supported
