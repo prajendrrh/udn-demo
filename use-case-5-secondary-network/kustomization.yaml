@@ -1,10 +1,10 @@
-# Use case 5: Multihoming (primary UDN + secondary NAD)
-# Pods have two interfaces: primary from UserDefinedNetwork, secondary from NetworkAttachmentDefinition.
+# Use case 5: Multihoming (primary UDN + secondary UDN)
+# Pods have two interfaces: primary from UserDefinedNetwork (udn-primary), secondary from UserDefinedNetwork (udn-secondary) via annotation.
 resources:
   - namespace.yaml
   - udn-primary.yaml
-  - network-attachment-definition.yaml
+  - udn-secondary.yaml
   - deployment-with-secondary.yaml
   - deployment-test-helper.yaml
-  # MultiNetworkPolicy (optional): enable useMultiNetworkPolicy on cluster, then uncomment:
+  # MultiNetworkPolicy (optional): enable useMultiNetworkPolicy on cluster, then uncomment (targets secondary UDN):
   # - multi-network-policy-example.yaml

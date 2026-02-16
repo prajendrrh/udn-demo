@@ -1,0 +1,16 @@
+# Secondary UDN: same namespace, role Secondary. Pods attach via k8s.v1.cni.cncf.io/networks.
+# Multihoming = primary UDN (100.5.0.0/24) + this secondary UDN (100.6.0.0/24).
+# The controller creates a NetworkAttachmentDefinition for this UDN; pods reference it as multihoming-demo/udn-secondary.
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-secondary
+  namespace: multihoming-demo
+spec:
+  topology: Layer2
+  layer2:
+    role: Secondary
+    subnets:
+      - "100.6.0.0/24"
+    ipam:
+      lifecycle: Persistent

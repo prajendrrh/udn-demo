@@ -1,5 +1,5 @@
-# Multihomed pods: primary = UDN (namespace), secondary = NAD (annotation).
-# Each pod has two interfaces: primary 100.5.0.x (UDN) and secondary 10.100.200.x (NAD).
+# Multihomed pods: primary = UDN (namespace), secondary = UDN (annotation).
+# Each pod has two interfaces: primary 100.5.0.x (udn-primary) and secondary 100.6.0.x (udn-secondary).
 # Image and TCP-based tests aligned with use cases 1–4 (no NET_RAW).
 apiVersion: apps/v1
 kind: Deployment
@@ -16,7 +16,7 @@ spec:
       labels:
         app: multihomed
       annotations:
-        k8s.v1.cni.cncf.io/networks: multihoming-demo/l2-secondary
+        k8s.v1.cni.cncf.io/networks: multihoming-demo/udn-secondary
     spec:
       containers:
         - name: app

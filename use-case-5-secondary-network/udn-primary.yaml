@@ -1,5 +1,5 @@
 # Primary network for multihoming: UDN in this namespace.
-# Pods get this as their primary (default) interface; secondary comes from the NAD annotation.
+# Pods get this as their primary (default) interface; secondary comes from the secondary UDN annotation.
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:

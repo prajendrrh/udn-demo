@@ -1,6 +1,6 @@
-# MultiNetworkPolicy applies to a secondary network (not the default network).
+# MultiNetworkPolicy applies to the secondary UDN (not the primary network).
 # Requires: spec.useMultiNetworkPolicy: true on networks.operator.openshift.io/cluster.
-# Annotation k8s.v1.cni.cncf.io/policy-for must point to <namespace>/<NAD_name>.
+# Annotation k8s.v1.cni.cncf.io/policy-for: <namespace>/<UDN_name> (controller creates NAD for UDN).
 # See: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/multiple_networks/secondary-networks#configuring-multi-network-policy
 apiVersion: k8s.cni.cncf.io/v1beta1
 kind: MultiNetworkPolicy
@@ -8,7 +8,7 @@ metadata:
   name: allow-same-namespace-secondary
   namespace: multihoming-demo
   annotations:
-    k8s.v1.cni.cncf.io/policy-for: multihoming-demo/l2-secondary
+    k8s.v1.cni.cncf.io/policy-for: multihoming-demo/udn-secondary
 spec:
   podSelector: {}
   policyTypes:

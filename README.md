@@ -32,7 +32,7 @@ Before committing or sharing, ensure the following are clear for anyone running 
 | **Cluster** | OpenShift Container Platform **4.18 or later** (UDN GA from 4.18). Nodes must use **cgroupv2** (default on RHCOS). |
 | **Access** | `oc` CLI; **cluster-admin** for CUDN (use cases 2, 7 CUDN) and BGP/route-advertisement config; **project-admin** is enough for namespace UDN (1, 3, 4). |
 | **Use case 4 (Overlapping IPs)** | No extra operators; two UDNs with the same subnet show overlapping pod IPs across namespaces. |
-| **Use case 5 (multihoming)** | No extra operators; primary UDN + secondary NAD on same pod. Optional **MultiNetworkPolicy** requires `useMultiNetworkPolicy` (see use-case-5 README). |
+| **Use case 5 (multihoming)** | No extra operators; primary UDN + secondary UDN on same pod. Optional **MultiNetworkPolicy** requires `useMultiNetworkPolicy` (see use-case-5 README). |
 | **Use case 6 (BGP)** | **Bare metal**; BGP/FRR enabled on CNO; edit **FRRConfiguration** with your BGP peer/ASN before applying. |
 | **Use case 7 (Route ads)** | **Bare metal**; CNO must have **FRR** and **routeAdvertisements: Enabled**; edit **neighbor address** in `frrconfiguration-receive-all.yaml` (e.g. route reflector IP) before applying. |
 
@@ -60,7 +60,7 @@ Each use case creates **namespaces, network resources, and pods** (Deployments).
 | **2. Cluster UDN** | Primary | Multi-namespace shared network with ClusterUserDefinedNetwork | `use-case-2-cluster-udn/` |
 | **3. Layer2 vs Layer3** | Primary | Layer2 and Layer3 UDN topologies | `use-case-3-layer2-layer3/` |
 | **4. Overlapping pod IPs** | Primary | Two UDNs with the same subnet; pods in different namespaces can have the same UDN IP | `use-case-4-vm-and-policies/` |
-| **5. Multihoming (primary UDN + secondary)** | Primary + Secondary | One primary UDN and one secondary NAD per pod; two interfaces | `use-case-5-secondary-network/` |
+| **5. Multihoming (primary UDN + secondary UDN)** | Primary + Secondary | One primary UDN and one secondary UDN per pod; two interfaces | `use-case-5-secondary-network/` |
 | **6. BGP routing** | Advanced | FRR-K8s, FRRConfiguration, custom BGP | `use-case-6-bgp-routing/` |
 | **7. Route advertisements** | Advanced | Advertise pod/CUDN routes via BGP, RouteAdvertisements CR | `use-case-7-route-advertisements/` |
 
@@ -81,7 +81,7 @@ oc apply -k use-case-3-layer2-layer3/
 # Use case 4: Overlapping pod IPs (two UDNs, same subnet)
 oc apply -k use-case-4-vm-and-policies/
 
-# Use case 5: Multihoming (primary UDN + secondary NAD)
+# Use case 5: Multihoming (primary UDN + secondary UDN)
 oc apply -k use-case-5-secondary-network/
 
 # Use case 6: BGP routing (enable FRR first; see use-case-6-bgp-routing/README.md)

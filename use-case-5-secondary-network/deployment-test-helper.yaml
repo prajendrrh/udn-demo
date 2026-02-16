@@ -1,4 +1,4 @@
-# Optional: multihomed helper pod (same primary UDN + secondary NAD) for running tests.
+# Optional: multihomed helper pod (same primary UDN + secondary UDN) for running tests.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,7 +14,7 @@ spec:
       labels:
         app: test-helper
       annotations:
-        k8s.v1.cni.cncf.io/networks: multihoming-demo/l2-secondary
+        k8s.v1.cni.cncf.io/networks: multihoming-demo/udn-secondary
     spec:
       containers:
         - name: app

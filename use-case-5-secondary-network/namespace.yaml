@@ -1,5 +1,5 @@
-# Namespace for multihoming: primary UDN + secondary NAD.
-# Label makes this namespace use a UserDefinedNetwork as primary; pods also attach a secondary via annotation.
+# Namespace for multihoming: primary UDN + secondary UDN.
+# Label makes this namespace use a UserDefinedNetwork as primary; pods attach secondary UDN via annotation.
 apiVersion: v1
 kind: Namespace
 metadata:
