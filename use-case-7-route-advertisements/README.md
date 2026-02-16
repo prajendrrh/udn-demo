@@ -72,7 +72,27 @@ oc get routeadvertisements
 # OVN-Kubernetes generates FRRConfiguration objects per node/network
 oc get frrconfiguration -n openshift-frr-k8s
 # Expect: receive-all + ovnk-generated-* entries
+
+# Test pod
+oc get pods -n route-adv-connectivity-demo -o wide
 ```
+
+## Test steps
+
+1. **Confirm RouteAdvertisements and generated FRRConfiguration**  
+   `oc get routeadvertisements` should show status `Accepted`. `oc get frrconfiguration -n openshift-frr-k8s` should list `receive-all` and `ovnk-generated-*` configs.
+
+2. **From the test pod: reach a route imported from the provider network**  
+   If your BGP peer (e.g. route reflector) advertises routes to the cluster, the test pod should be able to reach those IPs:
+   ```bash
+   POD=$(oc get pod -n route-adv-connectivity-demo -l app=connectivity-test -o jsonpath='{.items[0].metadata.name}')
+   # Replace with an IP from a prefix your peer advertises (e.g. from the Red Hat example: 192.168.1.1)
+   oc exec -n route-adv-connectivity-demo $POD -- ping -c 2 <IMPORTED_ROUTE_IP>
+   ```
+   Expected: replies if the route is imported and installed.
+
+3. **From the provider network: reach a pod IP (advertised by the cluster)**  
+   Get the test pod's IP: `oc get pod -n route-adv-connectivity-demo -l app=connectivity-test -o wide`. From a host or VM on the provider network that receives the cluster's BGP advertisements, ping that pod IP. Expected: replies (pod subnet is advertised by the cluster).
 
 ## Relation to BGP (use case 6)
 

@@ -1,0 +1,25 @@
+# Pods on UDN 203.0.113.0/24; same namespace as VMs. NetworkPolicy allows ingress only from same namespace.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: udn-vm-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-udn-vm
+  template:
+    metadata:
+      labels:
+        app: app-udn-vm
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

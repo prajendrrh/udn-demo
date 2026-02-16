@@ -1,0 +1,25 @@
+# Pods on Layer3 UDN (198.51.100.0/24 with per-node subnets).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: udn-layer3-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-layer3
+  template:
+    metadata:
+      labels:
+        app: app-layer3
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

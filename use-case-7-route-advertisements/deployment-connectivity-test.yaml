@@ -1,0 +1,25 @@
+# Test pod on default network: can reach routes imported via BGP; pod IP is advertised to provider network.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connectivity-test
+  namespace: route-adv-connectivity-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: connectivity-test
+  template:
+    metadata:
+      labels:
+        app: connectivity-test
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

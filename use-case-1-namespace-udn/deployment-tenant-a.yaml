@@ -1,0 +1,25 @@
+# Pods on tenant-a UDN (192.0.2.0/24). No annotation needed; namespace label assigns UDN.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: tenant-a
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-tenant-a
+  template:
+    metadata:
+      labels:
+        app: app-tenant-a
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

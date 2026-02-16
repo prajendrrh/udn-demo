@@ -52,7 +52,26 @@ oc get frrconfiguration -n openshift-frr-k8s
 
 # FRR-K8s daemon (after BGP is enabled)
 oc get pods -n openshift-frr-k8s
+
+# Test pod for connectivity checks
+oc get pods -n bgp-connectivity-demo -o wide
 ```
+
+## Test steps
+
+1. **Confirm FRR-K8s is running**  
+   `oc get pods -n openshift-frr-k8s` should show `frr-k8s-*` pods on nodes.
+
+2. **Reach a route learned via BGP**  
+   If your BGP peer advertises routes to the cluster (e.g. `192.168.1.0/24` from the Red Hat example), a pod on the default network should be able to reach those IPs. From the test pod:
+   ```bash
+   POD=$(oc get pod -n bgp-connectivity-demo -l app=connectivity-test -o jsonpath='{.items[0].metadata.name}')
+   # Replace with an IP from a prefix your BGP peer advertises (e.g. 192.168.1.1)
+   oc exec -n bgp-connectivity-demo $POD -- ping -c 2 <BGP_ADVERTISED_IP>
+   ```
+   Expected: replies if the route is received and installed on the node.
+
+3. **Optional:** From a host on the external network, ping a cluster pod IP or a prefix the cluster advertises (if your FRRConfiguration advertises prefixes) to verify outbound visibility.
 
 ## UDN and BGP
 

@@ -6,5 +6,7 @@ resources:
   - namespace.yaml
   - frrconfiguration-receive-all.yaml
   - route-advertisements-default.yaml
+  - namespace-connectivity-demo.yaml
+  - deployment-connectivity-test.yaml
   # Uncomment to also advertise CUDNs that have label export: "true"
   # - route-advertisements-cudn-example.yaml

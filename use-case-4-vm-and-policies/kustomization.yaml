@@ -5,3 +5,4 @@ resources:
   - namespace.yaml
   - udn.yaml
   - network-policy-deny-other-namespaces.yaml
+  - deployment.yaml

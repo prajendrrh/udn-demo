@@ -3,3 +3,5 @@ resources:
   - namespaces.yaml
   - udn-layer2.yaml
   - udn-layer3.yaml
+  - deployment-layer2.yaml
+  - deployment-layer3.yaml

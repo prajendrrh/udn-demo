@@ -1,0 +1,5 @@
+# Namespace for a test pod to verify BGP connectivity (reach routes learned via BGP).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bgp-connectivity-demo

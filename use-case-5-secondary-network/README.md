@@ -33,9 +33,39 @@ oc apply -k .
 # NAD exists
 oc get network-attachment-definitions -n secondary-net-demo
 
+# Pods and IPs
+oc get pods -n secondary-net-demo -o wide
+
 # Pod has two interfaces: default + secondary (check network-status)
 oc get pod -n secondary-net-demo -l app=with-secondary -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{.metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}{"\n"}{end}'
 ```
+
+## Test steps
+
+1. **Confirm two interfaces per pod**  
+   Each pod should have default cluster IP and a secondary IP in `10.100.200.0/24`:
+   ```bash
+   oc get pod -n secondary-net-demo -l app=with-secondary -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.podIP}{"\t"}{.metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}{"\n"}{end}' | head -1
+   ```
+   Parse the `network-status` JSON to see the secondary net (e.g. `10.100.200.x`).
+
+2. **Ping on default network**  
+   From one pod, ping another pod's **default** IP:
+   ```bash
+   POD1=$(oc get pod -n secondary-net-demo -l app=with-secondary -o jsonpath='{.items[0].metadata.name}')
+   IP2=$(oc get pod -n secondary-net-demo -l app=with-secondary -o jsonpath='{.items[1].status.podIP}')
+   oc exec -n secondary-net-demo $POD1 -- ping -c 2 $IP2
+   ```
+   Expected: replies (default network works).
+
+3. **Ping on secondary network**  
+   Use the `test-helper` pod (busybox with secondary net) to ping another pod's secondary IP. Get the secondary IP from `network-status` (e.g. `10.100.200.x`), then:
+   ```bash
+   POD_HELPER=$(oc get pod -n secondary-net-demo -l app=test-helper -o jsonpath='{.items[0].metadata.name}')
+   # Replace 10.100.200.x with the secondary IP from oc get pod ... -o jsonpath='{.items[0].metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}'
+   oc exec -n secondary-net-demo $POD_HELPER -- ping -c 2 10.100.200.x
+   ```
+   Expected: replies on the secondary L2 segment.
 
 ## MultiNetworkPolicy (optional)
 

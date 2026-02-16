@@ -1,0 +1,2 @@
+# Git commits
+When making commits in this repository, always use the repository owner's identity. Use the existing local git config (user.name and user.email); do not use "Cursor" or any bot name as the commit author so the public contributor list shows only the owner.

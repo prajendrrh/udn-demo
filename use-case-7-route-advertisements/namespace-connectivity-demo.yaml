@@ -1,0 +1,5 @@
+# Namespace for a test pod to verify route advertisements (reach imported routes, or be reachable from provider network).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: route-adv-connectivity-demo

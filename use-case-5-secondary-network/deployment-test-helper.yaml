@@ -1,0 +1,28 @@
+# Optional: busybox pod with secondary network for testing (has ping).
+# Use to ping secondary IPs from another pod.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-helper
+  namespace: secondary-net-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-helper
+  template:
+    metadata:
+      labels:
+        app: test-helper
+      annotations:
+        k8s.v1.cni.cncf.io/networks: secondary-net-demo/l2-secondary
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

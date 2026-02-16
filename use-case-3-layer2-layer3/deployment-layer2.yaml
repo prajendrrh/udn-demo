@@ -1,0 +1,25 @@
+# Pods on Layer2 UDN (192.0.2.0/24) - single logical switch.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: udn-layer2-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-layer2
+  template:
+    metadata:
+      labels:
+        app: app-layer2
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

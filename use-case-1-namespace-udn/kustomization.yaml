@@ -1,6 +1,8 @@
 # Use case 1: Namespace-level UserDefinedNetworks (tenant isolation)
-# Order matters: namespaces first, then UDN CRs.
+# Order matters: namespaces first, then UDN CRs, then deployments.
 resources:
   - namespace.yaml
   - udn-tenant-a.yaml
   - udn-tenant-b.yaml
+  - deployment-tenant-a.yaml
+  - deployment-tenant-b.yaml

@@ -16,6 +16,12 @@ Requires cluster-admin (for the CUDN):
 oc apply -k .
 ```
 
+Wait for pods to be Ready:
+
+```bash
+oc get pods -n team-platform-dev -n team-platform-staging -n team-platform-prod -o wide
+```
+
 ## Verify
 
 ```bash
@@ -24,7 +30,31 @@ oc get clusteruserdefinednetwork cudn-platform -o yaml
 
 # NetworkAttachmentDefinitions created per selected namespace
 oc get network-attachment-definitions -A | grep cudn-platform
+
+# Pod IPs (all should be in 203.0.113.0/24)
+oc get pods -n team-platform-dev -o wide
+oc get pods -n team-platform-staging -o wide
+oc get pods -n team-platform-prod -o wide
 ```
+
+## Test steps
+
+1. **Confirm all pod IPs are in the CUDN subnet** `203.0.113.0/24`.
+
+2. **Cross-namespace connectivity (same CUDN)**
+   - Get the pod IP in `team-platform-staging`:
+     ```bash
+     IP_STAGING=$(oc get pod -n team-platform-staging -l app=app-cudn -o jsonpath='{.items[0].status.podIP}')
+     echo $IP_STAGING
+     ```
+   - From the dev pod, ping the staging pod:
+     ```bash
+     POD_DEV=$(oc get pod -n team-platform-dev -l app=app-cudn -o jsonpath='{.items[0].metadata.name}')
+     oc exec -n team-platform-dev $POD_DEV -- ping -c 2 $IP_STAGING
+     ```
+   Expected: replies (pods on the shared CUDN can reach each other across namespaces).
+
+3. **Optional:** Repeat from prod to dev to confirm full mesh on the CUDN.
 
 ## Cleanup
 

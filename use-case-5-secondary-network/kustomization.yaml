@@ -4,5 +4,6 @@ resources:
   - namespace.yaml
   - network-attachment-definition.yaml
   - deployment-with-secondary.yaml
+  - deployment-test-helper.yaml
   # Enable after: oc patch network.operator.openshift.io cluster --type=merge -p '{"spec":{"useMultiNetworkPolicy":true}}'
   # - multi-network-policy-example.yaml

@@ -1,0 +1,25 @@
+# Pods on tenant-b UDN (198.51.100.0/24).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: tenant-b
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-tenant-b
+  template:
+    metadata:
+      labels:
+        app: app-tenant-b
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

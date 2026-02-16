@@ -1,0 +1,25 @@
+# Test pod to verify BGP: exec in and ping/curl an IP that your BGP peer advertises to the cluster.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connectivity-test
+  namespace: bgp-connectivity-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: connectivity-test
+  template:
+    metadata:
+      labels:
+        app: connectivity-test
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

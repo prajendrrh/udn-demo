@@ -52,6 +52,8 @@ Before committing or sharing, ensure the following are clear for anyone running 
 
 ## Use Cases in This Demo
 
+Each use case creates **namespaces, network resources, and pods** (Deployments). Each has a **Test steps** section in its README so you can verify connectivity and behavior.
+
 | Use Case | Type | Description | Path |
 |----------|------|-------------|------|
 | **1. Namespace UDN** | Primary | Single-tenant isolation with a UserDefinedNetwork per namespace | `use-case-1-namespace-udn/` |
