@@ -1,4 +1,4 @@
-# Pods on tenant-b UDN (198.51.100.0/24).
+# Pods on tenant-b UDN (198.51.100.0/24). Connectivity tested via TCP, no NET_RAW.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,12 +16,10 @@ spec:
     spec:
       containers:
         - name: app
-          image: busybox:1.36
+          image: registry.redhat.io/ubi9/ubi-minimal:9.4
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
-            capabilities:
-              add: ["NET_RAW"]  # required for ping (raw sockets)
             seccompProfile:
               type: RuntimeDefault

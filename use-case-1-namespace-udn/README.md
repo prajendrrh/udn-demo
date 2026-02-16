@@ -14,7 +14,7 @@ Each namespace has its own **UserDefinedNetwork (UDN)**. Pods (and VMs, if OpenS
 oc apply -k .
 ```
 
-Pods are given the `NET_RAW` capability so `ping` works from the container. If you already applied before and see "ping: permission denied", re-apply and restart the deployments so pods pick up the updated securityContext:
+Pods use **UBI 9 minimal** (`registry.redhat.io/ubi9/ubi-minimal:9.4`). Connectivity is tested via **TCP** (bash `/dev/tcp`) so no `NET_RAW` capability is required. If you already applied, re-apply and restart to pick up changes:
 
 ```bash
 oc apply -k .
@@ -46,24 +46,23 @@ oc get pods -n tenant-b -o wide
    - tenant-a pods: IPs in `192.0.2.0/24`
    - tenant-b pods: IPs in `198.51.100.0/24`
 
-2. **Connectivity within same tenant (same namespace)**
+2. **Connectivity within same tenant (same namespace)**  
+   Use TCP to test reachability (no listener needed; "Connection refused" means the host is reachable).
    ```bash
-   # Get a pod name in tenant-a
    POD_A=$(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[0].metadata.name}')
-   # Get another pod's IP in tenant-a
    IP_A=$(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[1].status.podIP}')
-   oc exec -n tenant-a $POD_A -- ping -c 2 $IP_A
+   oc exec -n tenant-a $POD_A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_A"'/80' 2>&1; echo Exit: \$?"
    ```
-   Expected: replies (pods in same UDN can reach each other).
+   Expected: "Connection refused" or "connect: Connection refused" and exit 1 — that means the pod is **reachable** (nothing listens on port 80). Timeout would mean unreachable.
 
-3. **Isolation across tenants**
-   Get a tenant-b pod IP, then from a tenant-a pod try to ping it. You should see no reply or timeout (tenant isolation).
+3. **Isolation across tenants**  
+   From a tenant-a pod, try TCP to a tenant-b pod IP. You should see **timeout** (no route / isolation).
    ```bash
    IP_B=$(oc get pod -n tenant-b -l app=app-tenant-b -o jsonpath='{.items[0].status.podIP}')
    echo "Tenant-B pod IP: $IP_B"
-   oc exec -n tenant-a $POD_A -- ping -c 2 $IP_B
+   oc exec -n tenant-a $POD_A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_B"'/80' 2>&1; echo Exit: \$?"
    ```
-   Expected: no replies (request timeouts or unreachable).
+   Expected: timeout (e.g. "timed out" or exit 124) — tenant-b is not reachable from tenant-a.
 
 ## Cleanup
 
