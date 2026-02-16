@@ -35,34 +35,77 @@ oc get pods -n tenant-b -w
 oc get userdefinednetwork -n tenant-a
 oc get userdefinednetwork -n tenant-b
 
-# Pods and their IPs (should be in 192.0.2.0/24 and 198.51.100.0/24)
+# Pod list (note: oc get pods -o wide may show the default OVN-K cluster IP, not the UDN IP)
 oc get pods -n tenant-a -o wide
 oc get pods -n tenant-b -o wide
 ```
 
+## Checking UDN IPs
+
+`oc get pods -o wide` shows the default cluster network IP. To see the **actual UDN IPs** (192.0.2.0/24 for tenant-a, 198.51.100.0/24 for tenant-b), use one of the following.
+
+**1. From inside the pod (most reliable)** — the primary interface in the pod is on the UDN:
+
+```bash
+# Tenant-a: UDN IPs (expect 192.0.2.x)
+for p in $(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[*].metadata.name}'); do
+  echo -n "$p: "; oc exec -n tenant-a $p -- ip -4 -o addr show 2>/dev/null | awk '{print $4}' | cut -d/ -f1
+done
+
+# Tenant-b: UDN IPs (expect 198.51.100.x)
+for p in $(oc get pod -n tenant-b -l app=app-tenant-b -o jsonpath='{.items[*].metadata.name}'); do
+  echo -n "$p: "; oc exec -n tenant-b $p -- ip -4 -o addr show 2>/dev/null | awk '{print $4}' | cut -d/ -f1
+done
+```
+
+If `ip` is not available in the image, use `hostname -I` (space-separated list of IPs; the first is usually the primary/UDN):
+
+```bash
+oc exec -n tenant-a $(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[0].metadata.name}') -- hostname -I
+oc exec -n tenant-b $(oc get pod -n tenant-b -l app=app-tenant-b -o jsonpath='{.items[0].metadata.name}') -- hostname -I
+```
+
+**2. Pod annotations** — primary UDN IP may appear in `network-status`:
+
+```bash
+oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}{"\n"}{end}'
+oc get pod -n tenant-b -l app=app-tenant-b -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}{"\n"}{end}'
+```
+
+Parse the JSON in `network-status` to get the IP for the primary/UDN interface.
+
+**3. Node subnets** — confirm which UDN subnets are assigned to nodes:
+
+```bash
+oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.k8s\.ovn\.org/node-subnets}{"\n"}{end}'
+```
+
+Use the **UDN IPs** from (1) or (2) in the connectivity test steps below when `status.podIP` shows the default cluster IP.
+
 ## Test steps
 
-1. **Confirm IPs are on the UDN subnets**
-   - tenant-a pods: IPs in `192.0.2.0/24`
-   - tenant-b pods: IPs in `198.51.100.0/24`
+Use **UDN IPs** from the "Checking UDN IPs" section for these tests. If you use `status.podIP` and see the default cluster IP, connectivity checks may target the wrong address.
+
+1. **Confirm IPs are on the UDN subnets**  
+   Run the "From inside the pod" loops under **Checking UDN IPs** and confirm tenant-a IPs are in `192.0.2.0/24` and tenant-b IPs in `198.51.100.0/24`.
 
 2. **Connectivity within same tenant (same namespace)**  
-   Use TCP to test reachability (no listener needed; "Connection refused" means the host is reachable).
+   Set `IP_A` to the **UDN IP** of the second tenant-a pod (from the loop above or from `oc exec ... -- ip -4 -o addr show`), then from the first pod run TCP to that IP:
    ```bash
    POD_A=$(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[0].metadata.name}')
-   IP_A=$(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[1].status.podIP}')
+   # Use the UDN IP of the other tenant-a pod (e.g. from "Checking UDN IPs" loop)
+   IP_A="192.0.2.x"   # replace with actual UDN IP from the other tenant-a pod
    oc exec -n tenant-a $POD_A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_A"'/80' 2>&1; echo Exit: \$?"
    ```
-   Expected: "Connection refused" or "connect: Connection refused" and exit 1 — that means the pod is **reachable** (nothing listens on port 80). Timeout would mean unreachable.
+   Expected: "Connection refused" (pod is reachable on the UDN).
 
 3. **Isolation across tenants**  
-   From a tenant-a pod, try TCP to a tenant-b pod IP. You should see **timeout** (no route / isolation).
+   Set `IP_B` to a **UDN IP** of a tenant-b pod, then from tenant-a try TCP to it:
    ```bash
-   IP_B=$(oc get pod -n tenant-b -l app=app-tenant-b -o jsonpath='{.items[0].status.podIP}')
-   echo "Tenant-B pod IP: $IP_B"
+   IP_B="198.51.100.x"   # replace with actual UDN IP from a tenant-b pod
    oc exec -n tenant-a $POD_A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_B"'/80' 2>&1; echo Exit: \$?"
    ```
-   Expected: timeout (e.g. "timed out" or exit 124) — tenant-b is not reachable from tenant-a.
+   Expected: timeout — tenant-b is not reachable from tenant-a.
 
 ## Cleanup
 
