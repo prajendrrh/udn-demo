@@ -1,4 +1,4 @@
-# Deployments on the shared CUDN (203.0.113.0/24) in each namespace.
+# Deployments on the shared CUDN (100.1.0.0/24) in each namespace.
 # UBI minimal; connectivity tested via TCP (no NET_RAW).
 ---
 apiVersion: apps/v1

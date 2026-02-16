@@ -1,5 +1,5 @@
 # UserDefinedNetwork for tenant-b (namespace-scoped).
-# Pods in tenant-b get IPs from 198.51.100.0/24; no overlap with tenant-a.
+# Pods in tenant-b get IPs from 200.0.0.0/24; no overlap with tenant-a.
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
@@ -10,6 +10,6 @@ spec:
   layer2:
     role: Primary
     subnets:
-      - "198.51.100.0/24"
+      - "200.0.0.0/24"
     ipam:
       lifecycle: Persistent

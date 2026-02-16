@@ -1,5 +1,5 @@
 # UserDefinedNetwork for tenant-a (namespace-scoped).
-# Pods in tenant-a get IPs from 192.0.2.0/24 and are isolated from other namespaces.
+# Pods in tenant-a get IPs from 100.0.0.0/24 and are isolated from other namespaces.
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
@@ -10,6 +10,6 @@ spec:
   layer2:
     role: Primary
     subnets:
-      - "192.0.2.0/24"
+      - "100.0.0.0/24"
     ipam:
       lifecycle: Persistent
