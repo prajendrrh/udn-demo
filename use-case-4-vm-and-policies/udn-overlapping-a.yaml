@@ -1,0 +1,14 @@
+# UDN in overlapping-a: subnet 100.4.0.0/24 (same as overlapping-b = overlapping IPs).
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-overlap
+  namespace: overlapping-a
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    subnets:
+      - "100.4.0.0/24"
+    ipam:
+      lifecycle: Persistent

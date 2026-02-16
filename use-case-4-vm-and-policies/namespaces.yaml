@@ -1,0 +1,14 @@
+# Two namespaces, each with its own UDN using the same subnet (overlapping pod IPs).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: overlapping-a
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: overlapping-b
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""

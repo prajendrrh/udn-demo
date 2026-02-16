@@ -1,8 +1,6 @@
-# Use Case 4: Pods on UDN + NetworkPolicy
+# Use Case 4: Overlapping Pod IPs
 
-Pods run on a **UserDefinedNetwork** (`100.3.0.0/24`) with a **NetworkPolicy** that allows ingress only from the same namespace. This demonstrates UDN plus policy-based isolation.
-
-**Optional:** If OpenShift Virtualization is installed, you can also run VMs in this namespace; they will get IPs from the same UDN. See [Optional: Using this UDN for VMs](#optional-using-this-udn-for-vms) at the end.
+Two namespaces each have their own **UserDefinedNetwork** using the **same subnet** (`100.4.0.0/24`). Pods in `overlapping-a` and pods in `overlapping-b` can get IPs from the same range (e.g. both can have `100.4.0.2`). There is no conflict because each UDN is a separate logical network; overlapping IPs are allowed across UDNs.
 
 ## Apply
 
@@ -13,52 +11,31 @@ oc apply -k .
 Wait for pods:
 
 ```bash
-oc get pods -n udn-vm-demo
+oc get pods -n overlapping-a
+oc get pods -n overlapping-b
 ```
 
 ## Show UDN IPs
 
-`oc get pods -o wide` shows the default cluster IP. To list each pod and its UDN IP from the annotation (requires `jq`):
+Both namespaces use the same subnet, so you can see the same IP (e.g. 100.4.0.2) in each (overlapping):
 
 ```bash
-echo "=== udn-vm-demo (UDN 100.3.0.0/24) ==="
-oc get pods -n udn-vm-demo -l app=app-udn-vm -o json | jq -r '.items[] | .metadata.name + ": " + ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("100.3.0."))) | .[0].ips[0] // "?")'
+echo "=== overlapping-a (UDN 100.4.0.0/24) ==="
+oc get pods -n overlapping-a -l app=app-overlap -o json | jq -r '.items[] | .metadata.name + ": " + ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("100.4.0."))) | .[0].ips[0] // "?")'
+
+echo "=== overlapping-b (UDN 100.4.0.0/24, same subnet) ==="
+oc get pods -n overlapping-b -l app=app-overlap -o json | jq -r '.items[] | .metadata.name + ": " + ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("100.4.0."))) | .[0].ips[0] // "?")'
 ```
+
+Example: both might show `100.4.0.2` — overlapping IPs, different logical networks.
 
 ## Test connectivity
 
-Use UDN IPs from **Show UDN IPs**. Checks use TCP (bash `/dev/tcp`), no `ping`.
-
-**1. Same namespace (allowed by NetworkPolicy)**  
-From one pod, connect to another pod’s UDN IP in the same namespace. You should see "Connection refused" (reachable).
-
-```bash
-POD1=$(oc get pod -n udn-vm-demo -l app=app-udn-vm -o jsonpath='{.items[0].metadata.name}')
-IP2=$(oc get pods -n udn-vm-demo -l app=app-udn-vm -o json | jq -r '.items[1].metadata.annotations["k8s.v1.cni.cncf.io/network-status"] | fromjson | map(select(.ips[0] | startswith("100.3.0."))) | .[0].ips[0]')
-echo "From $POD1 to same-namespace UDN IP $IP2:"
-oc exec -n udn-vm-demo $POD1 -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP2"'/80' 2>&1; echo exit: \$?"
-```
-Expected: `Connection refused` and exit 1.
-
-**2. NetworkPolicy: ingress from another namespace blocked**  
-From a pod in another namespace (e.g. `default`), try TCP to a `udn-vm-demo` pod’s UDN IP. The policy allows only same-namespace ingress, so you should see timeout.
-
-```bash
-# Create a temporary pod in default, then try to reach a UDN IP (replace with actual from Show UDN IPs)
-oc run test-policy --image=quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest --restart=Never -n default -- sleep 60
-sleep 10
-IP_UDN=$(oc get pods -n udn-vm-demo -l app=app-udn-vm -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"] | fromjson | map(select(.ips[0] | startswith("100.3.0."))) | .[0].ips[0]')
-oc exec -n default test-policy -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_UDN"'/80' 2>&1; echo exit: \$?"
-# Expected: timeout (exit 124). Clean up: oc delete pod test-policy -n default
-```
-Expected: timeout — policy blocks ingress from other namespaces. Delete the test pod when done: `oc delete pod test-policy -n default`.
+- **Within a namespace:** Same-namespace pods on the same UDN can reach each other by UDN IP (e.g. scale to 2 in one namespace and run a TCP test from one pod to the other’s UDN IP).
+- **Across namespaces:** Pods in `overlapping-a` and `overlapping-b` are on different UDNs (different logical networks). They are isolated even if their UDN IPs are the same; there is no connectivity between the two namespaces.
 
 ## Cleanup
 
 ```bash
 oc delete -k .
 ```
-
-## Optional: Using this UDN for VMs
-
-If **OpenShift Virtualization** is installed, you can create VMs in the same namespace `udn-vm-demo`. They will use this UDN and get IPs from `100.3.0.0/24` (Persistent IPAM). Create VMs via the OpenShift console or `VirtualMachine` manifests; no extra network config is required. The same NetworkPolicy applies: only ingress from the same namespace is allowed.

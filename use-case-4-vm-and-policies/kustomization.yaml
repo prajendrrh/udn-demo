@@ -1,7 +1,7 @@
-# Use case 4: Pods on UDN + NetworkPolicy (VM optional)
-# NetworkPolicy is optional; remove from resources if you only want the UDN.
+# Use case 4: Overlapping pod IPs
+# Two namespaces, two UDNs, same subnet (100.4.0.0/24). Pods in each namespace get IPs from the same range; no conflict because each UDN is a separate logical network.
 resources:
-  - namespace.yaml
-  - udn.yaml
-  - network-policy-deny-other-namespaces.yaml
+  - namespaces.yaml
+  - udn-overlapping-a.yaml
+  - udn-overlapping-b.yaml
   - deployment.yaml

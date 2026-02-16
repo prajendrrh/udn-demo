@@ -1,19 +1,44 @@
-# Pods on UDN 100.3.0.0/24. NetworkPolicy allows ingress only from same namespace.
-# Connectivity tested via TCP (no NET_RAW). Same image as use cases 1–3.
+# One pod per namespace; both UDNs use 100.4.0.0/24 so IPs can overlap (e.g. 100.4.0.2 in each).
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app
-  namespace: udn-vm-demo
+  namespace: overlapping-a
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: app-udn-vm
+      app: app-overlap
   template:
     metadata:
       labels:
-        app: app-udn-vm
+        app: app-overlap
+    spec:
+      containers:
+        - name: app
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: overlapping-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-overlap
+  template:
+    metadata:
+      labels:
+        app: app-overlap
     spec:
       containers:
         - name: app
