@@ -1,12 +1,12 @@
-# Use Case 7: Route Advertisements + UDN 192.168.20.0/24
+# Use Case 7: Route Advertisements + UDN (reach pod from bastion)
 
-Demonstrates **route advertisements** and a **UDN on the bastion network**: cluster machine network **192.168.29.0/24**, bastion **192.168.20.10** (use case 6). This use case adds:
+Demonstrates **route advertisements** so the **bastion (FRR on VM) can reach the pod**: cluster machine network **192.168.29.0/24**, bastion **192.168.20.10** (use case 6). This use case adds:
 
-- **CUDN** `cudn-bastion` with subnet **192.168.20.0/24** (same as bastion network).
-- A **pod** in namespace `udn-bastion-demo` on that UDN (pod gets an IP in 192.168.20.0/24).
-- **Route advertisements** enabled so the cluster advertises this UDN to the bastion and **imports routes** from the bastion (so the pod can reach 192.168.20.1).
+- **CUDN** `cudn-bastion` with subnet **192.168.21.0/24** (separate from bastion network 192.168.20.0/24 so the bastion has no local route and uses the BGP route to the cluster).
+- A **pod** in namespace `udn-bastion-demo` on that UDN (pod gets an IP in **192.168.21.0/24**).
+- **Route advertisements** so the cluster **advertises** 192.168.21.0/24 to the bastion and **imports** 192.168.20.0/24 from the bastion.
 
-**Goal:** ping **192.168.20.1** from the pod. The bastion (use case 6) advertises 192.168.20.0/24 to the cluster so the cluster has a route to 192.168.20.1; the cluster advertises the UDN to the bastion so the bastion can reach the pod.
+**Goal:** from the **bastion VM** (or any host that peers with the cluster), **ping the pod IP** (192.168.21.x). The cluster advertises the UDN subnet to the bastion; the bastion accepts it and forwards traffic to the cluster. (Pod → 192.168.20.1 already works because the cluster imports 192.168.20.0/24 from the bastion.)
 
 ## What this does
 
@@ -57,10 +57,10 @@ oc patch network.operator cluster --type=merge -p '{
 
 - **Namespace** `openshift-frr-k8s` (for FRRConfiguration).
 - **Namespace** `udn-bastion-demo` (primary-UDN + `udn-bastion: "true"` for CUDN).
-- **ClusterUserDefinedNetwork** `cudn-bastion`: subnet **192.168.20.0/24**, label `export: "true"`.
+- **ClusterUserDefinedNetwork** `cudn-bastion`: subnet **192.168.21.0/24** (advertised to bastion; no overlap with 192.168.20.0/24), label `export: "true"`.
 - **FRRConfiguration** `receive-all`: BGP peer **192.168.20.10** (bastion), ASN 64513, eBGP multi-hop; accepts all routes.
-- **RouteAdvertisements** `default` and `advertise-cudns`: advertise default network and CUDNs with `export: "true"`.
-- **Deployment** `udn-pod` in `udn-bastion-demo`: one pod on UDN 192.168.20.0/24 (for ping 192.168.20.1).
+- **RouteAdvertisements** `default` and `advertise-cudns`: advertise default network and CUDNs with `export: "true"` (so bastion learns 192.168.21.0/24).
+- **Deployment** `udn-pod` in `udn-bastion-demo`: one pod on UDN 192.168.21.0/24 (reachable from bastion).
 
 ## Apply order
 
@@ -79,7 +79,7 @@ oc get routeadvertisements
 # CUDN and UDN pod
 oc get cudn
 oc get pods -n udn-bastion-demo -o wide
-# Pod should have an IP in 192.168.20.0/24 (check network-status annotation if not in -o wide)
+# Pod should have an IP in 192.168.21.0/24 (check network-status annotation if not in -o wide)
 
 # FRRConfiguration
 oc get frrconfiguration -n openshift-frr-k8s
@@ -88,18 +88,26 @@ oc get frrconfiguration -n openshift-frr-k8s
 ## Test steps
 
 1. **Confirm RouteAdvertisements and CUDN**  
-   `oc get routeadvertisements` should show status `Accepted`. `oc get cudn` should show `cudn-bastion`. Pod in `udn-bastion-demo` should be Running and get an IP in 192.168.20.0/24.
+   `oc get routeadvertisements` should show status `Accepted`. `oc get cudn` should show `cudn-bastion`. Pod in `udn-bastion-demo` should be Running and get an IP in **192.168.21.0/24**.
 
-2. **Ping 192.168.20.1 from the UDN pod**  
-   The pod is on the UDN 192.168.20.0/24; the bastion advertises that prefix to the cluster so the cluster can route to 192.168.20.1:
+2. **Reach the pod from the bastion VM (main goal)**  
+   Get the pod's UDN IP (192.168.21.x), then from the **bastion** (192.168.20.10) ping it. The cluster advertises 192.168.21.0/24 to the bastion, so the bastion should have a BGP route and forward traffic to the cluster:
+   ```bash
+   # From your laptop (or any host with oc)
+   oc get pod -n udn-bastion-demo -l app=udn-bastion-pod -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"]' | jq -r '.[] | select(.ips[0] | startswith("192.168.21.")) | .ips[0]'
+   # Use that IP (e.g. 192.168.21.2) on the bastion:
+   # ssh bastion
+   # ping -c 2 192.168.21.2
+   ```
+   Expected: from the bastion, ping to the pod IP (192.168.21.x) gets replies. The bastion learned 192.168.21.0/24 from the cluster via BGP and sends traffic to the cluster node.
+
+3. **Ping 192.168.20.1 from the UDN pod (outbound)**  
+   The cluster imports 192.168.20.0/24 from the bastion, so the pod can reach the bastion network:
    ```bash
    UDN_POD=$(oc get pod -n udn-bastion-demo -l app=udn-bastion-pod -o jsonpath='{.items[0].metadata.name}')
    oc exec -n udn-bastion-demo $UDN_POD -- ping -c 2 192.168.20.1
    ```
-   Expected: replies if the route is imported from the bastion and connectivity is correct.
-
-3. **From the bastion (or 192.168.20.x): reach the UDN pod**  
-   Get the pod's UDN IP from `oc get pod -n udn-bastion-demo -l app=udn-bastion-pod -o jsonpath='{.metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}'` (parse for 192.168.20.x). From the bastion or another host that receives the cluster's BGP advertisements, ping that IP. Expected: replies (CUDN subnet is advertised by the cluster).
+   Expected: replies if 192.168.20.1 is reachable from the bastion and the cluster has the imported route.
 
 ## Relation to BGP (use case 6)
 

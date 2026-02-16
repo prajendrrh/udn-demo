@@ -1,5 +1,4 @@
-# Pod on the CUDN 192.168.20.0/24 (same subnet as bastion). Use to test ping 192.168.20.1.
-# Requires CUDN and route advertisements so cluster advertises this UDN to the bastion and imports routes from the bastion.
+# Pod on the CUDN 192.168.21.0/24. Cluster advertises this subnet to the bastion so you can ping the pod from the bastion VM.
 # busybox has ping (NET_RAW needed for ICMP).
 apiVersion: apps/v1
 kind: Deployment
