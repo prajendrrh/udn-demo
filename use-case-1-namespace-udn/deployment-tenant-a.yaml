@@ -21,5 +21,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
+            capabilities:
+              add: ["NET_RAW"]  # required for ping (raw sockets)
             seccompProfile:
               type: RuntimeDefault

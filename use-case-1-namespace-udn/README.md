@@ -14,6 +14,13 @@ Each namespace has its own **UserDefinedNetwork (UDN)**. Pods (and VMs, if OpenS
 oc apply -k .
 ```
 
+Pods are given the `NET_RAW` capability so `ping` works from the container. If you already applied before and see "ping: permission denied", re-apply and restart the deployments so pods pick up the updated securityContext:
+
+```bash
+oc apply -k .
+oc rollout restart deployment/app -n tenant-a && oc rollout restart deployment/app -n tenant-b
+```
+
 Wait for pods to be Ready:
 
 ```bash
@@ -50,7 +57,13 @@ oc get pods -n tenant-b -o wide
    Expected: replies (pods in same UDN can reach each other).
 
 3. **Isolation across tenants**
-   - From a tenant-a pod, try to ping a tenant-b pod IP (from step 1). You should see no reply or timeout, demonstrating tenant isolation.
+   Get a tenant-b pod IP, then from a tenant-a pod try to ping it. You should see no reply or timeout (tenant isolation).
+   ```bash
+   IP_B=$(oc get pod -n tenant-b -l app=app-tenant-b -o jsonpath='{.items[0].status.podIP}')
+   echo "Tenant-B pod IP: $IP_B"
+   oc exec -n tenant-a $POD_A -- ping -c 2 $IP_B
+   ```
+   Expected: no replies (request timeouts or unreachable).
 
 ## Cleanup
 
