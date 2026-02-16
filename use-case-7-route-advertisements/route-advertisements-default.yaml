@@ -12,11 +12,11 @@ spec:
   nodeSelector: {}
   frrConfigurationSelector:
     matchLabels:
-      use-for-advertisements: true
+      use-for-advertisements: "true"
   networkSelectors:
     - networkSelectionType: DefaultNetwork
     - networkSelectionType: ClusterUserDefinedNetworks
       clusterUserDefinedNetworkSelector:
         networkSelector:
           matchLabels:
-            advertise: true
+            advertise: "true"
