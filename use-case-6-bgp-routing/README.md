@@ -68,7 +68,7 @@ oc get pods -n bgp-connectivity-demo -o wide
    `oc get pods -n openshift-frr-k8s` should show `frr-k8s-*` pods on nodes.
 
 2. **Reach a route learned via BGP (e.g. 192.168.20.1)**  
-   With the bastion advertising 192.168.20.0/24, a pod on the default network should reach 192.168.20.1 (or any IP in that prefix):
+   With the bastion advertising 192.168.20.0/24, a pod on the default network should reach 192.168.20.1:
    ```bash
    POD=$(oc get pod -n bgp-connectivity-demo -l app=connectivity-test -o jsonpath='{.items[0].metadata.name}')
    oc exec -n bgp-connectivity-demo $POD -- ping -c 2 192.168.20.1
@@ -76,7 +76,7 @@ oc get pods -n bgp-connectivity-demo -o wide
    Expected: replies if the route is received from the bastion and installed on the node.
 
 3. **Reach the UDN pod from the bastion (after use case 7)**  
-   Use case 7 creates a pod on UDN 192.168.21.0/24; the cluster advertises that subnet to the bastion. The bastion config uses `route-map IMPORT in` so it **accepts routes from the cluster**. From the bastion VM, ping the pod IP (192.168.21.x). See use case 7 README for how to get the pod IP and run the ping from the bastion.
+   Use case 7 creates a pod on UDN 192.168.100.0/24; the cluster advertises that subnet to the bastion. The bastion config uses `route-map IMPORT in` so it **accepts routes from the cluster**. From the bastion VM, ping the pod IP (192.168.100.x). See use case 7 README for how to get the pod IP and run the ping from the bastion.
 
 ## UDN and BGP
 
