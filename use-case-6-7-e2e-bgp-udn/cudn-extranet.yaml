@@ -4,7 +4,7 @@ kind: ClusterUserDefinedNetwork
 metadata:
   name: extranet
   labels:
-    advertise: true
+    advertise: "true"
 spec:
   namespaceSelector:
     matchLabels:
