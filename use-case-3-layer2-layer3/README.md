@@ -2,8 +2,8 @@
 
 Compare **Layer2** (single L2 segment) and **Layer3** (per-node subnets, L3 routing) User-Defined Networks.
 
-- **Layer2** (`udn-layer2-demo`): One namespace, one UDN. All pods on subnet `100.2.0.0/24`. Single logical switch.
-- **Layer3** (`udn-layer3-a`, `udn-layer3-b`): Two namespaces sharing one **Layer3 CUDN** (`200.1.0.0/22`, per-node /26s). One pod per namespace so we can demonstrate **L3 connectivity across namespaces** without the "timed out waiting for annotations" issue of two pods in the same namespace.
+- **Layer2** (`udn-layer2-demo`): One namespace, one UDN. All pods on the **same subnet** `100.2.0.0/24`. Single logical switch; no routing between pods.
+- **Layer3** (`udn-layer3-a`, `udn-layer3-b`): Two namespaces sharing one **Layer3 CUDN** (`200.1.0.0/22`). Each namespace’s pod is on a **different subnet** (per-node /26, e.g. `200.1.0.0/26` on one node, `200.1.1.0/26` on another). Traffic between the two pods **goes through L3 routing**, not the same L2 segment. One pod per namespace demonstrates this cross-subnet, routed connectivity.
 
 Requires **cluster-admin** for the Layer3 CUDN.
 
@@ -36,15 +36,15 @@ echo "=== udn-layer3-b (Layer3 CUDN 200.1.x.x) ==="
 oc get pods -n udn-layer3-b -l app=app-layer3 -o json | jq -r '.items[] | .metadata.name + ": " + ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("200.1."))) | .[0].ips[0] // "?")'
 ```
 
-Example output:
+Example output (Layer3 pods are on **different subnets**; e.g. 200.1.0.x vs 200.1.1.x — traffic between them goes through routing):
 
 ```
 === udn-layer2-demo (Layer2 100.2.0.0/24) ===
 app-xxxxx-abc: 100.2.0.2
 app-xxxxx-def: 100.2.0.3
-=== udn-layer3-a (Layer3 CUDN 200.1.x.x) ===
+=== udn-layer3-a (Layer3 CUDN, one subnet per node) ===
 app-yyyyy-aaa: 200.1.0.2
-=== udn-layer3-b (Layer3 CUDN 200.1.x.x) ===
+=== udn-layer3-b (Layer3 CUDN, different subnet) ===
 app-yyyyy-bbb: 200.1.1.3
 ```
 
@@ -63,8 +63,8 @@ oc exec -n udn-layer2-demo $POD_L2 -- bash -c "timeout 2 bash -c 'echo >/dev/tcp
 ```
 Expected: `Connection refused` and exit 1.
 
-**2. Layer3: across namespaces (pod in -a → pod in -b)**  
-From the pod in `udn-layer3-a`, connect to the pod in `udn-layer3-b`’s CUDN IP. You should see "Connection refused" (reachable). This demonstrates **L3 connectivity across namespaces** (and across nodes if the pods are on different nodes).
+**2. Layer3: across namespaces, different subnets, via routing**  
+The pod in `udn-layer3-a` and the pod in `udn-layer3-b` are on **different subnets** (each node has its own /26). From the pod in `udn-layer3-a`, connect to the pod in `udn-layer3-b`’s CUDN IP. Traffic goes **through L3 routing**, not a shared L2 segment. You should see "Connection refused" (reachable).
 
 ```bash
 POD_L3A=$(oc get pod -n udn-layer3-a -l app=app-layer3 -o jsonpath='{.items[0].metadata.name}')
@@ -72,15 +72,10 @@ IP_L3B=$(oc get pods -n udn-layer3-b -l app=app-layer3 -o json | jq -r '.items[0
 echo "From $POD_L3A (udn-layer3-a) to udn-layer3-b pod CUDN IP $IP_L3B:"
 oc exec -n udn-layer3-a $POD_L3A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_L3B"'/80' 2>&1; echo exit: \$?"
 ```
-Expected: `Connection refused` and exit 1 (L3 routing across namespaces).
+Expected: `Connection refused` and exit 1 (reachable via L3 routing across different subnets).
 
 ## Cleanup
 
 ```bash
 oc delete -k .
 ```
-
-## Troubleshooting
-
-**"timed out waiting for annotations" when creating Layer3 pods**  
-Try: delete the stuck pod; confirm node subnets (`oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.k8s\.ovn\.org/node-subnets}{"\n"}{end}'`); check CNO/OVN-Kubernetes logs. With two namespaces and one pod each, each pod can land on a different node, which often avoids the timeout seen with two pods in the same namespace.
