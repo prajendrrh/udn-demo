@@ -8,28 +8,60 @@ Each namespace has its own **UserDefinedNetwork (UDN)**. Pods in tenant-a get IP
 oc apply -k .
 ```
 
-Wait for pods: `oc get pods -n tenant-a -n tenant-b -o wide`
+Wait for pods:
+
+```bash
+oc get pods -n tenant-a
+oc get pods -n tenant-b
+```
 
 ## Show UDN IPs
 
-`oc get pods -o wide` shows the default cluster IP, not the UDN IP. To see UDN IPs, run:
+`oc get pods -o wide` shows the default cluster IP, not the UDN IP. To list each pod and its UDN IP from the pod annotation `k8s.v1.cni.cncf.io/network-status` (requires `jq`):
 
 ```bash
-# Tenant-a (expect 192.0.2.x)
-for p in $(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[*].metadata.name}'); do
-  echo -n "$p: "; oc exec -n tenant-a $p -- ip -4 -o addr show 2>/dev/null | awk '{print $4}' | cut -d/ -f1
-done
+echo "=== tenant-a (UDN 192.0.2.0/24) ==="
+oc get pods -n tenant-a -l app=app-tenant-a -o json | jq -r '.items[] | .metadata.name as $n | ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson)[0].ips[0] // "?" as $ip | "\($n): \($ip)"'
 
-# Tenant-b (expect 198.51.100.x)
-for p in $(oc get pod -n tenant-b -l app=app-tenant-b -o jsonpath='{.items[*].metadata.name}'); do
-  echo -n "$p: "; oc exec -n tenant-b $p -- ip -4 -o addr show 2>/dev/null | awk '{print $4}' | cut -d/ -f1
-done
+echo "=== tenant-b (UDN 198.51.100.0/24) ==="
+oc get pods -n tenant-b -l app=app-tenant-b -o json | jq -r '.items[] | .metadata.name as $n | ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson)[0].ips[0] // "?" as $ip | "\($n): \($ip)"'
+```
+
+Example output:
+
+```
+=== tenant-a (UDN 192.0.2.0/24) ===
+app-7b8c9d-xk2m4: 192.0.2.2
+app-7b8c9d-z9pqr: 192.0.2.3
+=== tenant-b (UDN 198.51.100.0/24) ===
+app-5d4e3f-ab12c: 198.51.100.2
+app-5d4e3f-cd34e: 198.51.100.3
 ```
 
 ## Test connectivity
 
-- **Same tenant:** From one tenant-a pod, open a TCP connection to another tenant-a pod’s **UDN IP** (from above). You should get "Connection refused" (reachable).
-- **Isolation:** From a tenant-a pod, try the same to a tenant-b **UDN IP**. You should get timeout (not reachable).
+Use the UDN IPs from **Show UDN IPs** above. All checks use TCP (no `ping`).
+
+**1. Within the same namespace (tenant-a → tenant-a)**  
+From one tenant-a pod, connect to another tenant-a pod’s UDN IP. You should see "Connection refused" (reachable; nothing listens on port 80).
+
+```bash
+POD_A=$(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[0].metadata.name}')
+IP_A=$(oc get pods -n tenant-a -l app=app-tenant-a -o json | jq -r '.items[1].metadata.annotations["k8s.v1.cni.cncf.io/network-status"] | fromjson | .[0].ips[0]')
+echo "From $POD_A to tenant-a UDN IP $IP_A (same namespace):"
+oc exec -n tenant-a $POD_A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_A"'/80' 2>&1; echo exit: \$?"
+```
+Expected: `Connection refused` and exit 1 (traffic reaches the pod).
+
+**2. Across namespaces (tenant-a → tenant-b)**  
+From a tenant-a pod, connect to a tenant-b pod’s UDN IP. You should see timeout (isolated).
+
+```bash
+IP_B=$(oc get pods -n tenant-b -l app=app-tenant-b -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"] | fromjson | .[0].ips[0]')
+echo "From $POD_A to tenant-b UDN IP $IP_B (different namespace):"
+oc exec -n tenant-a $POD_A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_B"'/80' 2>&1; echo exit: \$?"
+```
+Expected: timeout (e.g. exit 124) — no route to the other tenant.
 
 ## Cleanup
 
