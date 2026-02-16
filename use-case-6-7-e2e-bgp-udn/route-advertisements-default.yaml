@@ -1,6 +1,4 @@
-# RouteAdvertisements: single CR for default network + CUDNs with label advertise: true.
-# Requires FRR + routeAdvertisements enabled on CNO and an FRRConfiguration with label use-for-advertisements: true.
-# Fix from sample: ClusterUserDefineNetworks -> ClusterUserDefinedNetworks.
+# RouteAdvertisements: advertises default network + CUDNs with label advertise: true (e.g. extranet 10.10.10.0/24).
 apiVersion: k8s.ovn.org/v1
 kind: RouteAdvertisements
 metadata:

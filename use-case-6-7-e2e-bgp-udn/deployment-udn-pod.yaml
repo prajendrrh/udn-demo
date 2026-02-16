@@ -1,5 +1,4 @@
-# Pod on the CUDN 10.10.10.0/24. Cluster advertises this subnet to the bastion so you can reach the pod from the bastion VM.
-# Same image and restricted Pod Security as other use cases (no NET_RAW; use TCP for connectivity tests).
+# Pod on UDN 10.10.10.0/24 (extranet). Cluster advertises this subnet to the bastion so you can reach the pod from the VM.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

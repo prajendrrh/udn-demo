@@ -9,7 +9,6 @@ resources:
   - cudn-bastion-network.yaml
   - frrconfiguration-receive-all.yaml
   - route-advertisements-default.yaml
-  - route-advertisements-cudn-example.yaml
   - namespace-connectivity-demo.yaml
   - deployment-connectivity-test.yaml
   - deployment-udn-bastion-pod.yaml

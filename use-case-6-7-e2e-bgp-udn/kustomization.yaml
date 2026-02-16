@@ -1,0 +1,12 @@
+# End-to-end BGP + UDN + Route Advertisements (merged use cases 6 and 7).
+# Apply after: (1) FRR on VM, (2) FRR + routeAdvertisements enabled on OpenShift.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace-extranet.yaml
+  - cudn-extranet.yaml
+  - frrconfiguration-bastion.yaml
+  - route-advertisements-default.yaml
+  - namespace-bgp-connectivity-demo.yaml
+  - deployment-connectivity-test.yaml
+  - deployment-udn-pod.yaml

@@ -1,19 +1,18 @@
-# Pod on the CUDN 10.10.10.0/24. Cluster advertises this subnet to the bastion so you can reach the pod from the bastion VM.
-# Same image and restricted Pod Security as other use cases (no NET_RAW; use TCP for connectivity tests).
+# Pod on default network: use this to test reaching outside (e.g. 172.20.0.1 on bastion network).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: udn-pod
-  namespace: extranet
+  name: connectivity-test
+  namespace: bgp-connectivity-demo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: udn-bastion-pod
+      app: connectivity-test
   template:
     metadata:
       labels:
-        app: udn-bastion-pod
+        app: connectivity-test
     spec:
       containers:
         - name: app

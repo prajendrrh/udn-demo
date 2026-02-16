@@ -19,5 +19,5 @@ spec:
             export: "true"
   frrConfigurationSelector:
     matchLabels:
-      routeAdvertisements: receive-all
+      use-for-advertisements: true
   nodeSelector: {}

@@ -33,15 +33,17 @@ Before committing or sharing, ensure the following are clear for anyone running 
 | **Access** | `oc` CLI; **cluster-admin** for CUDN (use cases 2, 7 CUDN) and BGP/route-advertisement config; **project-admin** is enough for namespace UDN (1, 3, 4). |
 | **Use case 4 (Overlapping IPs)** | No extra operators; two UDNs with the same subnet show overlapping pod IPs across namespaces. |
 | **Use case 5 (multihoming)** | No extra operators; primary UDN + secondary UDN on same pod. Optional **MultiNetworkPolicy** requires `useMultiNetworkPolicy` (see use-case-5 README). |
-| **Use case 6 (BGP)** | **Bare metal**; BGP/FRR enabled on CNO; edit **FRRConfiguration** with your BGP peer/ASN before applying. |
-| **Use case 7 (Route ads)** | **Bare metal**; CNO must have **FRR** and **routeAdvertisements: Enabled**; edit **neighbor address** in `frrconfiguration-receive-all.yaml` (e.g. route reflector IP) before applying. |
+| **Use case 6+7 (e2e BGP + UDN)** | **Bare metal**; follow the 5-step flow in `use-case-6-7-e2e-bgp-udn/README.md` (FRR on VM, enable FRR+RA, UDN, FRRConfiguration + RouteAdvertisements, test pods). |
+| **Use case 6 (BGP only)** | **Bare metal**; BGP/FRR enabled on CNO; edit **FRRConfiguration** with your BGP peer/ASN before applying. |
+| **Use case 7 (Route ads only)** | **Bare metal**; CNO must have **FRR** and **routeAdvertisements: Enabled**; edit **neighbor address** in FRRConfiguration before applying. |
 | **Use case 8 (Services in UDN)** | No extra operators; BLUE and RED namespaces on separate UDNs with Services; project-admin. |
 
 **Before you apply:**
 
 1. **Use cases 1–5, 8:** No cluster config changes required; apply with `oc apply -k <use-case-dir>/`.
-2. **Use case 6:** Enable FRR on CNO (see `use-case-6-bgp-routing/README.md`), then edit the FRRConfiguration neighbor/ASN and apply.
-3. **Use case 7:** Enable FRR and route advertisements on CNO (see `use-case-7-route-advertisements/README.md`), edit the BGP neighbor in `frrconfiguration-receive-all.yaml`, then apply (FRRConfiguration before RouteAdvertisements).
+2. **Use case 6+7 (e2e):** Follow the 5-step guide in `use-case-6-7-e2e-bgp-udn/README.md` (configure FRR on VM, enable FRR+RA in OpenShift, then `oc apply -k use-case-6-7-e2e-bgp-udn/`).
+3. **Use case 6 only:** Enable FRR on CNO (see `use-case-6-bgp-routing/README.md`), then edit FRRConfiguration and apply.
+4. **Use case 7 only:** Enable FRR and route advertisements on CNO (see `use-case-7-route-advertisements/README.md`), edit the BGP neighbor, then apply.
 
 **Optional before commit:** If your team uses a specific BGP peer IP or ASN, document it (e.g. in a README note or `.env.example`) so others know what to replace.
 
@@ -62,8 +64,9 @@ Each use case creates **namespaces, network resources, and pods** (Deployments).
 | **3. Layer2 vs Layer3** | Primary | Layer2 and Layer3 UDN topologies | `use-case-3-layer2-layer3/` |
 | **4. Overlapping pod IPs** | Primary | Two UDNs with the same subnet; pods in different namespaces can have the same UDN IP | `use-case-4-vm-and-policies/` |
 | **5. Multihoming (primary UDN + secondary UDN)** | Primary + Secondary | One primary UDN and one secondary UDN per pod; two interfaces | `use-case-5-secondary-network/` |
-| **6. BGP routing** | Advanced | FRR-K8s, FRRConfiguration, custom BGP | `use-case-6-bgp-routing/` |
-| **7. Route advertisements** | Advanced | Advertise pod/CUDN routes via BGP, RouteAdvertisements CR | `use-case-7-route-advertisements/` |
+| **6+7. BGP + UDN + Route Advertisements (e2e)** | Advanced | **Recommended.** End-to-end: FRR on VM → enable FRR/RA in OpenShift → UDN → FRRConfiguration + RouteAdvertisements → pods; with troubleshooting | `use-case-6-7-e2e-bgp-udn/` |
+| **6. BGP routing** | Advanced | FRR-K8s, FRRConfiguration only (no UDN/RA) | `use-case-6-bgp-routing/` |
+| **7. Route advertisements** | Advanced | UDN + RouteAdvertisements only (assumes BGP already set up) | `use-case-7-route-advertisements/` |
 | **8. Services in UDN (BLUE/RED)** | Primary | BLUE and RED namespaces each on their own UDN; only pods on BLUE can access Service blue, only pods on RED can access Service red | `use-case-8-services-in-udn/` |
 
 ## Quick Start
@@ -86,10 +89,13 @@ oc apply -k use-case-4-vm-and-policies/
 # Use case 5: Multihoming (primary UDN + secondary UDN)
 oc apply -k use-case-5-secondary-network/
 
-# Use case 6: BGP routing (enable FRR first; see use-case-6-bgp-routing/README.md)
+# Use case 6+7: End-to-end BGP + UDN + Route Advertisements (recommended; see use-case-6-7-e2e-bgp-udn/README.md)
+oc apply -k use-case-6-7-e2e-bgp-udn/
+
+# Use case 6: BGP routing only (enable FRR first; see use-case-6-bgp-routing/README.md)
 oc apply -k use-case-6-bgp-routing/
 
-# Use case 7: Route advertisements (enable FRR + routeAdvertisements; see use-case-7-route-advertisements/README.md)
+# Use case 7: Route advertisements only (enable FRR + routeAdvertisements; see use-case-7-route-advertisements/README.md)
 oc apply -k use-case-7-route-advertisements/
 
 # Use case 8: Services in UDN (BLUE/RED — service isolation by network)
