@@ -55,7 +55,7 @@ oc patch network.operator cluster --type=merge -p '{
 
 ## What’s included
 
-- **Namespace** `openshift-frr-k8s` (for FRRConfiguration).
+- **Namespace** `openshift-frr-k8s` is created automatically by the cluster when you enable FRR (not in this kustomization).
 - **Namespace** `udn-bastion-demo` (primary-UDN + `udn-bastion: "true"` for CUDN).
 - **ClusterUserDefinedNetwork** `cudn-bastion`: subnet **192.168.100.0/24** (advertised to bastion; no overlap with 192.168.20.0/24), label `export: "true"`.
 - **FRRConfiguration** `receive-all`: BGP peer **192.168.29.10** (bastion), ASN 64513, eBGP multi-hop; accepts all routes.

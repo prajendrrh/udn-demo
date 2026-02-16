@@ -36,7 +36,7 @@ oc patch Network.operator.openshift.io/cluster --type=merge -p '{
 
 ## What’s included
 
-- **Namespace** `openshift-frr-k8s` (required for FRRConfiguration in 4.18+).
+- **Namespace** `openshift-frr-k8s` is created automatically by the cluster when you enable FRR (not in this kustomization).
 - **FRRConfiguration** `bgp-demo`: peers with bastion **192.168.29.10** (ASN 64513), cluster ASN 64512, eBGP multi-hop; **toReceive: all** so the cluster learns 192.168.20.0/24 from the bastion.
 - **bastion-frr-config.conf**: sample FRR config for the bastion (replace CLUSTER_NODE_IP with a node IP from 192.168.29.0/24).
 
