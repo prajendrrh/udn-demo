@@ -1,8 +1,8 @@
-# FRRConfiguration: OpenShift peers with bastion VM (192.168.20.10).
-# Cluster nodes are on machine network 192.168.29.0/24; bastion is 192.168.20.10.
+# FRRConfiguration: OpenShift peers with bastion VM (192.168.29.10).
+# Cluster nodes and bastion are on machine network 192.168.29.0/24.
 # Prerequisites: (1) Enable FRR-K8s on OpenShift (see README). (2) Configure FRR on bastion (see bastion-frr-config.conf).
 #
-# This config: neighbor 192.168.20.10 (bastion), ASN 64513; cluster ASN 64512; eBGP multi-hop.
+# This config: neighbor 192.168.29.10 (bastion), ASN 64513; cluster ASN 64512; eBGP multi-hop.
 # toReceive: accept all routes from bastion (so cluster learns 192.168.20.0/24 and pods can reach 192.168.20.1).
 apiVersion: frrk8s.metallb.io/v1beta1
 kind: FRRConfiguration
@@ -14,7 +14,7 @@ spec:
     routers:
       - asn: 64512
         neighbors:
-          - address: 192.168.20.10
+          - address: 192.168.29.10
             asn: 64513
             port: 179
             ebgpMultiHop: true

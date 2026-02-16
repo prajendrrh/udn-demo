@@ -1,6 +1,6 @@
 # Use Case 6: BGP Routing (FRR-K8s + FRR on bastion VM)
 
-Demonstrates **BGP routing** in two places: (1) **FRR on a bastion VM** (192.168.20.10) as external router and (2) **FRR-K8s on OpenShift**. Example: cluster machine network **192.168.29.0/24**, bastion **192.168.20.10** (advertises 192.168.20.0/24, accepts routes from cluster). Use case 7 adds a UDN 192.168.20.0/24 and route advertisements so a pod can ping 192.168.20.1.
+Demonstrates **BGP routing** in two places: (1) **FRR on a bastion VM** (192.168.29.10) as external router and (2) **FRR-K8s on OpenShift**. Example: cluster machine network **192.168.29.0/24**, bastion **192.168.29.10** (advertises 192.168.20.0/24, accepts routes from cluster). Use case 7 adds a UDN 192.168.20.0/24 and route advertisements so a pod can ping 192.168.20.1.
 
 ## Prerequisites
 
@@ -8,7 +8,7 @@ Demonstrates **BGP routing** in two places: (1) **FRR on a bastion VM** (192.168
 - Proper BGP setup on your network provider; misconfiguration can cause cluster network issues.
 - If using **MetalLB Operator**, BGP/FRR-K8s is enabled automatically; skip step 1 below.
 
-## 1. Configure FRR on the bastion VM (192.168.20.10)
+## 1. Configure FRR on the bastion VM (192.168.29.10)
 
 On the bastion: install FRR (e.g. `dnf install frr`), copy `bastion-frr-config.conf`, replace **CLUSTER_NODE_IP** with one node IP from 192.168.29.0/24 (e.g. 192.168.29.2), then load the config (e.g. `/etc/frr/frr.conf` and restart FRR). The sample advertises **192.168.20.0/24** to the cluster and accepts all routes from the cluster.
 
@@ -37,12 +37,12 @@ oc patch Network.operator.openshift.io/cluster --type=merge -p '{
 ## What’s included
 
 - **Namespace** `openshift-frr-k8s` (required for FRRConfiguration in 4.18+).
-- **FRRConfiguration** `bgp-demo`: peers with bastion **192.168.20.10** (ASN 64513), cluster ASN 64512, eBGP multi-hop; **toReceive: all** so the cluster learns 192.168.20.0/24 from the bastion.
+- **FRRConfiguration** `bgp-demo`: peers with bastion **192.168.29.10** (ASN 64513), cluster ASN 64512, eBGP multi-hop; **toReceive: all** so the cluster learns 192.168.20.0/24 from the bastion.
 - **bastion-frr-config.conf**: sample FRR config for the bastion (replace CLUSTER_NODE_IP with a node IP from 192.168.29.0/24).
 
 ## Apply (after enabling BGP and configuring bastion FRR)
 
-1. Optional: edit `frrconfiguration-example.yaml` if your bastion IP or ASN differs (default: 192.168.20.10, ASN 64513).
+1. Optional: edit `frrconfiguration-example.yaml` if your bastion IP or ASN differs (default: 192.168.29.10, ASN 64513).
 2. Apply:
 
 ```bash

@@ -1,6 +1,6 @@
 # Use Case 7: Route Advertisements + UDN (reach pod from bastion)
 
-Demonstrates **route advertisements** so the **bastion (FRR on VM) can reach the pod**: cluster machine network **192.168.29.0/24**, bastion **192.168.20.10** (use case 6). This use case adds:
+Demonstrates **route advertisements** so the **bastion (FRR on VM) can reach the pod**: cluster machine network **192.168.29.0/24**, bastion **192.168.29.10** (use case 6). This use case adds:
 
 - **CUDN** `cudn-bastion` with subnet **192.168.21.0/24** (separate from bastion network 192.168.20.0/24 so the bastion has no local route and uses the BGP route to the cluster).
 - A **pod** in namespace `udn-bastion-demo` on that UDN (pod gets an IP in **192.168.21.0/24**).
@@ -58,13 +58,13 @@ oc patch network.operator cluster --type=merge -p '{
 - **Namespace** `openshift-frr-k8s` (for FRRConfiguration).
 - **Namespace** `udn-bastion-demo` (primary-UDN + `udn-bastion: "true"` for CUDN).
 - **ClusterUserDefinedNetwork** `cudn-bastion`: subnet **192.168.21.0/24** (advertised to bastion; no overlap with 192.168.20.0/24), label `export: "true"`.
-- **FRRConfiguration** `receive-all`: BGP peer **192.168.20.10** (bastion), ASN 64513, eBGP multi-hop; accepts all routes.
+- **FRRConfiguration** `receive-all`: BGP peer **192.168.29.10** (bastion), ASN 64513, eBGP multi-hop; accepts all routes.
 - **RouteAdvertisements** `default` and `advertise-cudns`: advertise default network and CUDNs with `export: "true"` (so bastion learns 192.168.21.0/24).
 - **Deployment** `udn-pod` in `udn-bastion-demo`: one pod on UDN 192.168.21.0/24 (reachable from bastion).
 
 ## Apply order
 
-1. Complete use case 6 (FRR on bastion 192.168.20.10, FRR-K8s on cluster). Enable route advertisements (see above).
+1. Complete use case 6 (FRR on bastion 192.168.29.10, FRR-K8s on cluster). Enable route advertisements (see above).
 2. Apply (namespace, CUDN, FRRConfiguration, RouteAdvertisements, deployments):
    ```bash
    oc apply -k .
@@ -91,7 +91,7 @@ oc get frrconfiguration -n openshift-frr-k8s
    `oc get routeadvertisements` should show status `Accepted`. `oc get cudn` should show `cudn-bastion`. Pod in `udn-bastion-demo` should be Running and get an IP in **192.168.21.0/24**.
 
 2. **Reach the pod from the bastion VM (main goal)**  
-   Get the pod's UDN IP (192.168.21.x), then from the **bastion** (192.168.20.10) ping it. The cluster advertises 192.168.21.0/24 to the bastion, so the bastion should have a BGP route and forward traffic to the cluster:
+   Get the pod's UDN IP (192.168.21.x), then from the **bastion** (192.168.29.10) ping it. The cluster advertises 192.168.21.0/24 to the bastion, so the bastion should have a BGP route and forward traffic to the cluster:
    ```bash
    # From your laptop (or any host with oc)
    oc get pod -n udn-bastion-demo -l app=udn-bastion-pod -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"]' | jq -r '.[] | select(.ips[0] | startswith("192.168.21.")) | .ips[0]'
