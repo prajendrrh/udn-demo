@@ -1,4 +1,4 @@
-# Use case 7: Route advertisements + UDN 192.168.100.0/24 (reach pod from bastion VM)
+# Use case 7: Route advertisements + UDN 10.10.10.0/24 (reach pod from bastion VM)
 # 1. Enable FRR and routeAdvertisements on CNO (see README). The cluster creates openshift-frr-k8s automatically.
 # 2. Use case 6: FRR on bastion 192.168.29.10 and FRR-K8s on cluster so they peer.
 # 3. Apply: namespace udn-bastion-demo, CUDN, FRRConfiguration, RouteAdvertisements, deployments.
