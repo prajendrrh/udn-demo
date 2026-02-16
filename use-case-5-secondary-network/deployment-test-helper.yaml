@@ -1,10 +1,9 @@
-# Optional: busybox pod with secondary network for testing (has ping).
-# Use to ping secondary IPs from another pod.
+# Optional: multihomed helper pod (same primary UDN + secondary NAD) for running tests.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: test-helper
-  namespace: secondary-net-demo
+  namespace: multihoming-demo
 spec:
   replicas: 1
   selector:
@@ -15,11 +14,11 @@ spec:
       labels:
         app: test-helper
       annotations:
-        k8s.v1.cni.cncf.io/networks: secondary-net-demo/l2-secondary
+        k8s.v1.cni.cncf.io/networks: multihoming-demo/l2-secondary
     spec:
       containers:
         - name: app
-          image: busybox:1.36
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false

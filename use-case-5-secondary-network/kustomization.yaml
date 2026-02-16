@@ -1,9 +1,10 @@
-# Use case 5: Secondary network (NAD + pod attachment + optional MultiNetworkPolicy)
-# MultiNetworkPolicy requires cluster useMultiNetworkPolicy: true; exclude if not enabled.
+# Use case 5: Multihoming (primary UDN + secondary NAD)
+# Pods have two interfaces: primary from UserDefinedNetwork, secondary from NetworkAttachmentDefinition.
 resources:
   - namespace.yaml
+  - udn-primary.yaml
   - network-attachment-definition.yaml
   - deployment-with-secondary.yaml
   - deployment-test-helper.yaml
-  # Enable after: oc patch network.operator.openshift.io cluster --type=merge -p '{"spec":{"useMultiNetworkPolicy":true}}'
+  # MultiNetworkPolicy (optional): enable useMultiNetworkPolicy on cluster, then uncomment:
   # - multi-network-policy-example.yaml

@@ -1,11 +1,10 @@
-# OVN-Kubernetes secondary network (layer2) via NetworkAttachmentDefinition.
-# Pods keep the default network and get an extra interface on this L2 segment.
-# See: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/multiple_networks/secondary-networks
+# Secondary network (NAD): same pod also gets an interface on this L2 segment.
+# Multihoming = primary UDN (100.5.0.0/24) + this secondary (10.100.200.0/24).
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
   name: l2-secondary
-  namespace: secondary-net-demo
+  namespace: multihoming-demo
 spec:
   config: |
     {
@@ -14,6 +13,6 @@ spec:
       "type": "ovn-k8s-cni-overlay",
       "topology": "layer2",
       "subnets": "10.100.200.0/24",
-      "netAttachDefName": "secondary-net-demo/l2-secondary",
+      "netAttachDefName": "multihoming-demo/l2-secondary",
       "excludeSubnets": "10.100.200.0/29"
     }

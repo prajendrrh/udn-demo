@@ -1,0 +1,15 @@
+# Primary network for multihoming: UDN in this namespace.
+# Pods get this as their primary (default) interface; secondary comes from the NAD annotation.
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-primary
+  namespace: multihoming-demo
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    subnets:
+      - "100.5.0.0/24"
+    ipam:
+      lifecycle: Persistent

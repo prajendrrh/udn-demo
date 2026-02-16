@@ -1,25 +1,22 @@
-# Use Case 5: Secondary Network (OVN-Kubernetes NAD)
+# Use Case 5: Multihoming (Primary UDN + Secondary NAD)
 
-Demonstrates an **OVN-Kubernetes secondary network** using a `NetworkAttachmentDefinition` (NAD). Pods keep the **default cluster network** as primary and get an **additional interface** on the secondary L2 segment. This is different from primary UDN, where the UDN replaces the default network for the namespace.
+Demonstrates **multihoming**: each pod has **two interfaces** — a **primary User-Defined Network** (UDN) and a **secondary network** (NAD). The namespace uses a UDN as its primary network (replacing the default cluster network), and pods attach to an additional L2 segment via a `NetworkAttachmentDefinition`.
 
-## Primary vs secondary
-
-| | Primary (UDN) | Secondary (this use case) |
-|--|---------------|----------------------------|
-| Default network | Replaced by UDN in labeled namespaces | Unchanged; all pods have default + secondary |
-| Pod attachment | Automatic in UDN namespaces | Opt-in via `k8s.v1.cni.cncf.io/networks` |
-| Use case | Tenant isolation, VM networking | Extra L2 segment for selected workloads |
+| Interface | Source | Subnet |
+|-----------|--------|--------|
+| Primary | UserDefinedNetwork `udn-primary` | 100.5.0.0/24 |
+| Secondary | NetworkAttachmentDefinition `l2-secondary` | 10.100.200.0/24 |
 
 ## What’s included
 
-- **Namespace** `secondary-net-demo` (no UDN label).
-- **NetworkAttachmentDefinition** `l2-secondary`: OVN-Kubernetes layer2, subnet `10.100.200.0/24`, exclude `10.100.200.0/29`.
-- **Deployment** `app-with-secondary`: pods annotated to attach to `secondary-net-demo/l2-secondary`.
-- **MultiNetworkPolicy** example (commented out in kustomization): applies to the secondary network; requires `spec.useMultiNetworkPolicy: true` on the cluster Network operator.
+- **Namespace** `multihoming-demo` with the primary-UDN label.
+- **UserDefinedNetwork** `udn-primary`: primary subnet 100.5.0.0/24.
+- **NetworkAttachmentDefinition** `l2-secondary`: secondary subnet 10.100.200.0/24.
+- **Deployments** `app-multihomed` (2 replicas) and `test-helper` (1): both use primary UDN + secondary NAD annotation.
 
 ## Prerequisites
 
-- OVN-Kubernetes (default in OpenShift). Secondary NAD is supported on bare metal, IBM Power, IBM Z, LinuxONE, VMware vSphere, RHOSP.
+- OVN-Kubernetes (default in OpenShift). Multihoming (UDN + NAD) and secondary NAD are supported on the same platforms as secondary networks (bare metal, IBM Power, IBM Z, LinuxONE, VMware vSphere, RHOSP).
 
 ## Apply
 
@@ -27,58 +24,60 @@ Demonstrates an **OVN-Kubernetes secondary network** using a `NetworkAttachmentD
 oc apply -k .
 ```
 
-## Verify
+Wait for pods:
 
 ```bash
-# NAD exists
-oc get network-attachment-definitions -n secondary-net-demo
-
-# Pods and IPs
-oc get pods -n secondary-net-demo -o wide
-
-# Pod has two interfaces: default + secondary (check network-status)
-oc get pod -n secondary-net-demo -l app=with-secondary -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{.metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}{"\n"}{end}'
+oc get pods -n multihoming-demo
 ```
 
-## Test steps
+## Show both IPs (primary UDN + secondary)
 
-1. **Confirm two interfaces per pod**  
-   Each pod should have default cluster IP and a secondary IP in `10.100.200.0/24`:
-   ```bash
-   oc get pod -n secondary-net-demo -l app=with-secondary -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.podIP}{"\t"}{.metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}{"\n"}{end}' | head -1
-   ```
-   Parse the `network-status` JSON to see the secondary net (e.g. `10.100.200.x`).
+Each pod’s `network-status` annotation lists interfaces: primary (UDN 100.5.0.x) and secondary (10.100.200.x).
 
-2. **Ping on default network**  
-   From one pod, ping another pod's **default** IP:
-   ```bash
-   POD1=$(oc get pod -n secondary-net-demo -l app=with-secondary -o jsonpath='{.items[0].metadata.name}')
-   IP2=$(oc get pod -n secondary-net-demo -l app=with-secondary -o jsonpath='{.items[1].status.podIP}')
-   oc exec -n secondary-net-demo $POD1 -- ping -c 2 $IP2
-   ```
-   Expected: replies (default network works).
+```bash
+echo "=== Pod name | Primary (UDN) | Secondary (NAD) ==="
+oc get pods -n multihoming-demo -l app=multihomed -o json | jq -r '.items[] | .metadata.name + " | " + (((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson) | map(select(.ips[0] | startswith("100.5.0."))) | .[0].ips[0] // "?") + " | " + (((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson) | map(select(.ips[0] | startswith("10.100.200."))) | .[0].ips[0] // "?")'
+```
 
-3. **Ping on secondary network**  
-   Use the `test-helper` pod (busybox with secondary net) to ping another pod's secondary IP. Get the secondary IP from `network-status` (e.g. `10.100.200.x`), then:
+Example: each pod shows one primary IP in 100.5.0.0/24 and one secondary in 10.100.200.0/24.
+
+## Test connectivity (TCP)
+
+Use TCP (no NET_RAW) to verify reachability on both networks. Replace `<PRIMARY_IP>` and `<SECONDARY_IP>` with the other pod’s UDN and NAD IPs from the command above.
+
+1. **On primary (UDN):** From one pod, test TCP to the other pod’s primary IP (e.g. port 80; connection refused is expected if nothing is listening):
+
    ```bash
-   POD_HELPER=$(oc get pod -n secondary-net-demo -l app=test-helper -o jsonpath='{.items[0].metadata.name}')
-   # Replace 10.100.200.x with the secondary IP from oc get pod ... -o jsonpath='{.items[0].metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}'
-   oc exec -n secondary-net-demo $POD_HELPER -- ping -c 2 10.100.200.x
+   POD1=$(oc get pod -n multihoming-demo -l app=multihomed -o jsonpath='{.items[0].metadata.name}')
+   PRIMARY2=$(oc get pods -n multihoming-demo -l app=multihomed -o json | jq -r '.items[1] | (.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("100.5.0."))) | .[0].ips[0]')
+   oc exec -n multihoming-demo $POD1 -- timeout 2 bash -c "echo >/dev/tcp/$PRIMARY2/80" 2>/dev/null || true
    ```
-   Expected: replies on the secondary L2 segment.
+   Expected: connection refused or timeout; path is reachable if you get “Connection refused” quickly.
+
+2. **On secondary (NAD):** Same idea using the other pod’s secondary IP:
+
+   ```bash
+   SECONDARY2=$(oc get pods -n multihoming-demo -l app=multihomed -o json | jq -r '.items[1] | (.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("10.100.200."))) | .[0].ips[0]')
+   oc exec -n multihoming-demo $POD1 -- timeout 2 bash -c "echo >/dev/tcp/$SECONDARY2/80" 2>/dev/null || true
+   ```
+   Expected: connection refused or timeout; path is reachable if you get “Connection refused” quickly.
 
 ## MultiNetworkPolicy (optional)
 
-To use the example MultiNetworkPolicy:
+The example policy applies to the **secondary** network. To use it:
 
 1. Enable multi-network policy:  
    `oc patch network.operator.openshift.io cluster --type=merge -p '{"spec":{"useMultiNetworkPolicy":true}}'`
 2. Add `multi-network-policy-example.yaml` to `kustomization.yaml` and apply again.
 
-Policies target the secondary network via the annotation  
-`k8s.v1.cni.cncf.io/policy-for: <namespace>/<network_attachment_definition_name>`.
+## Cleanup
+
+```bash
+oc delete -k .
+```
 
 ## References
 
-- [Secondary networks (OpenShift 4.21)](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/multiple_networks/secondary-networks)
+- [Primary networks (UDN) – OpenShift 4.21](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/multiple_networks/primary-networks)
+- [Secondary networks – OpenShift 4.21](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/multiple_networks/secondary-networks)
 - [Configuring multi-network policy](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/multiple_networks/secondary-networks#configuring-multi-network-policy)

@@ -1,6 +1,8 @@
-# Namespace for secondary network demo.
-# No UDN label: pods use the default cluster network as primary and attach a secondary via NAD.
+# Namespace for multihoming: primary UDN + secondary NAD.
+# Label makes this namespace use a UserDefinedNetwork as primary; pods also attach a secondary via annotation.
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: secondary-net-demo
+  name: multihoming-demo
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""

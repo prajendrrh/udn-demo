@@ -6,9 +6,9 @@ apiVersion: k8s.cni.cncf.io/v1beta1
 kind: MultiNetworkPolicy
 metadata:
   name: allow-same-namespace-secondary
-  namespace: secondary-net-demo
+  namespace: multihoming-demo
   annotations:
-    k8s.v1.cni.cncf.io/policy-for: secondary-net-demo/l2-secondary
+    k8s.v1.cni.cncf.io/policy-for: multihoming-demo/l2-secondary
 spec:
   podSelector: {}
   policyTypes:
