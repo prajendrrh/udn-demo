@@ -1,5 +1,5 @@
 # Layer3 UDN: one L2 segment per node, each with a different subnet; L3 routing between nodes.
-# CIDR 200.1.0.0/24 split into per-node /24s; good for L3-only and scale.
+# CIDR 200.1.0.0/24 split into per-node /26s (hostSubnet must be > CIDR prefix so each node gets a smaller slice).
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
@@ -11,4 +11,4 @@ spec:
     role: Primary
     subnets:
       - cidr: "200.1.0.0/24"
-        hostSubnet: 24  # per-node subnet prefix; for IPv6 only /64 is supported
+        hostSubnet: 26  # per-node /26 (e.g. 200.1.0.0/26, 200.1.0.64/26, ...); must be larger than CIDR prefix
