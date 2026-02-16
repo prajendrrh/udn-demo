@@ -1,5 +1,5 @@
 # Deployments on the shared CUDN (203.0.113.0/24) in each namespace.
-# Pods in dev/staging/prod get IPs from the same subnet and can reach each other by IP.
+# UBI minimal; connectivity tested via TCP (no NET_RAW).
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -7,7 +7,7 @@ metadata:
   name: app
   namespace: team-platform-dev
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: app-cudn
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: busybox:1.36
+          image: registry.redhat.io/ubi9/ubi-minimal:9.4
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false
@@ -32,7 +32,7 @@ metadata:
   name: app
   namespace: team-platform-staging
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: app-cudn
@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: busybox:1.36
+          image: registry.redhat.io/ubi9/ubi-minimal:9.4
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false
@@ -57,7 +57,7 @@ metadata:
   name: app
   namespace: team-platform-prod
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: app-cudn
@@ -68,7 +68,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: busybox:1.36
+          image: registry.redhat.io/ubi9/ubi-minimal:9.4
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false
