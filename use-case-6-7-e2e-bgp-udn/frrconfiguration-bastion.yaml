@@ -15,9 +15,8 @@ spec:
         neighbors:
           - address: 192.168.29.10
             asn: 64512
-            ebgpMultiHop: true
             toReceive:
               allowed:
                 mode: filtered
                 prefixes:
-                  - prefix: 172.20.0.0/24
+                  - prefix: 10.10.10.0/24
