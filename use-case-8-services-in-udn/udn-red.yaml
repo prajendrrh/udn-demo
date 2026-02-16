@@ -1,0 +1,15 @@
+# Network RED: namespace red, subnet 200.3.0.0/24.
+# Only pods in this network can reach Service red.
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-red
+  namespace: red
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    subnets:
+      - "200.3.0.0/24"
+    ipam:
+      lifecycle: Persistent

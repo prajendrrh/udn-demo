@@ -1,0 +1,14 @@
+# BLUE and RED namespaces; each has its own primary UDN (network BLUE / network RED).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: blue
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: red
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""

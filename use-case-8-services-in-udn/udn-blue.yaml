@@ -1,0 +1,15 @@
+# Network BLUE: namespace blue, subnet 100.8.0.0/24.
+# Only pods in this network can reach Service blue.
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-blue
+  namespace: blue
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    subnets:
+      - "100.8.0.0/24"
+    ipam:
+      lifecycle: Persistent
