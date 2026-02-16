@@ -25,6 +25,8 @@ Demonstrates **service isolation by UDN**: namespace **BLUE** is on network **BL
 
 ## Apply
 
+Use **`oc apply -k`** (Kustomize) so resources are applied in the right order (namespaces first, then UDNs, then deployments and services). Do **not** use `oc apply -f` on the directory.
+
 ```bash
 oc apply -k .
 ```

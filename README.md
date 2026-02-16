@@ -35,10 +35,11 @@ Before committing or sharing, ensure the following are clear for anyone running 
 | **Use case 5 (multihoming)** | No extra operators; primary UDN + secondary UDN on same pod. Optional **MultiNetworkPolicy** requires `useMultiNetworkPolicy` (see use-case-5 README). |
 | **Use case 6 (BGP)** | **Bare metal**; BGP/FRR enabled on CNO; edit **FRRConfiguration** with your BGP peer/ASN before applying. |
 | **Use case 7 (Route ads)** | **Bare metal**; CNO must have **FRR** and **routeAdvertisements: Enabled**; edit **neighbor address** in `frrconfiguration-receive-all.yaml` (e.g. route reflector IP) before applying. |
+| **Use case 8 (Services in UDN)** | No extra operators; BLUE and RED namespaces on separate UDNs with Services; project-admin. |
 
 **Before you apply:**
 
-1. **Use cases 1–5:** No cluster config changes required; apply with `oc apply -k <use-case-dir>/`.
+1. **Use cases 1–5, 8:** No cluster config changes required; apply with `oc apply -k <use-case-dir>/`.
 2. **Use case 6:** Enable FRR on CNO (see `use-case-6-bgp-routing/README.md`), then edit the FRRConfiguration neighbor/ASN and apply.
 3. **Use case 7:** Enable FRR and route advertisements on CNO (see `use-case-7-route-advertisements/README.md`), edit the BGP neighbor in `frrconfiguration-receive-all.yaml`, then apply (FRRConfiguration before RouteAdvertisements).
 
@@ -90,6 +91,9 @@ oc apply -k use-case-6-bgp-routing/
 
 # Use case 7: Route advertisements (enable FRR + routeAdvertisements; see use-case-7-route-advertisements/README.md)
 oc apply -k use-case-7-route-advertisements/
+
+# Use case 8: Services in UDN (BLUE/RED — service isolation by network)
+oc apply -k use-case-8-services-in-udn/
 ```
 
 ## Important: Namespace Label
