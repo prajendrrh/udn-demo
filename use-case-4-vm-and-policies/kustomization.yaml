@@ -1,6 +1,5 @@
-# Use case 4: VMs on UDN + NetworkPolicy
-# Requires OpenShift Virtualization for VM workloads.
-# NetworkPolicy is optional; remove if you only want the UDN.
+# Use case 4: Pods on UDN + NetworkPolicy (VM optional)
+# NetworkPolicy is optional; remove from resources if you only want the UDN.
 resources:
   - namespace.yaml
   - udn.yaml

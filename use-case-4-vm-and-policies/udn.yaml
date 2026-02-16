@@ -1,5 +1,5 @@
-# UDN for VMs: deterministic IPs from a dedicated subnet.
-# VMs get stable IPs (Persistent IPAM) for clustering, backup agents, and monitoring.
+# UDN for pods (and optionally VMs): dedicated subnet with Persistent IPAM.
+# Same namespace can host VMs (OpenShift Virtualization) which also get IPs from this subnet.
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
@@ -10,6 +10,6 @@ spec:
   layer2:
     role: Primary
     subnets:
-      - "203.0.113.0/24"
+      - "100.3.0.0/24"
     ipam:
       lifecycle: Persistent

@@ -1,4 +1,4 @@
-# Namespace for VM + UDN + NetworkPolicy demo (OpenShift Virtualization).
+# Namespace for UDN + NetworkPolicy demo (pods; optionally VMs if OpenShift Virtualization is installed).
 apiVersion: v1
 kind: Namespace
 metadata:
