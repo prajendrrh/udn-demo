@@ -5,6 +5,5 @@ resources:
   - udn-primary.yaml
   - udn-secondary.yaml
   - deployment-with-secondary.yaml
-  - deployment-test-helper.yaml
   # MultiNetworkPolicy (optional): enable useMultiNetworkPolicy on cluster, then uncomment (targets secondary UDN):
   # - multi-network-policy-example.yaml

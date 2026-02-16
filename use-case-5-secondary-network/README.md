@@ -12,7 +12,7 @@ Demonstrates **multihoming**: each pod has **two interfaces** — a **primary Us
 - **Namespace** `multihoming-demo` with the primary-UDN label.
 - **UserDefinedNetwork** `udn-primary`: primary subnet 100.5.0.0/24.
 - **UserDefinedNetwork** `udn-secondary`: secondary subnet 100.6.0.0/24 (pods attach via annotation).
-- **Deployments** `app-multihomed` (2 replicas) and `test-helper` (1): both use primary UDN + secondary UDN annotation.
+- **Deployment** `app-multihomed` (2 replicas): each pod has primary UDN + secondary UDN (annotation).
 
 ## Prerequisites
 
@@ -43,24 +43,24 @@ Example: each pod shows one primary IP in 100.5.0.0/24 and one secondary in 100.
 
 ## Test connectivity (TCP)
 
-Use TCP (no NET_RAW) to verify reachability on both networks.
+Use TCP (no NET_RAW) to verify reachability on both networks. The commands print a result line so you see whether the path is reachable.
 
 1. **On primary (UDN):** From one pod, test TCP to the other pod’s primary IP (e.g. port 80; connection refused is expected if nothing is listening):
 
    ```bash
    POD1=$(oc get pod -n multihoming-demo -l app=multihomed -o jsonpath='{.items[0].metadata.name}')
    PRIMARY2=$(oc get pods -n multihoming-demo -l app=multihomed -o json | jq -r '.items[1] | (.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("100.5.0."))) | .[0].ips[0]')
-   oc exec -n multihoming-demo $POD1 -- timeout 2 bash -c "echo >/dev/tcp/$PRIMARY2/80" 2>/dev/null || true
+   oc exec -n multihoming-demo $POD1 -- timeout 2 bash -c "echo >/dev/tcp/$PRIMARY2/80 2>&1 && echo 'Primary: connected' || echo 'Primary: connection refused (path OK)'"
    ```
-   Expected: connection refused or timeout; path is reachable if you get “Connection refused” quickly.
+   Expected: `Primary: connection refused (path OK)` (path reachable; nothing on 80).
 
 2. **On secondary (UDN):** Same idea using the other pod’s secondary IP:
 
    ```bash
    SECONDARY2=$(oc get pods -n multihoming-demo -l app=multihomed -o json | jq -r '.items[1] | (.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("100.6.0."))) | .[0].ips[0]')
-   oc exec -n multihoming-demo $POD1 -- timeout 2 bash -c "echo >/dev/tcp/$SECONDARY2/80" 2>/dev/null || true
+   oc exec -n multihoming-demo $POD1 -- timeout 2 bash -c "echo >/dev/tcp/$SECONDARY2/80 2>&1 && echo 'Secondary: connected' || echo 'Secondary: connection refused (path OK)'"
    ```
-   Expected: connection refused or timeout; path is reachable if you get “Connection refused” quickly.
+   Expected: `Secondary: connection refused (path OK)` (path reachable; nothing on 80).
 
 ## MultiNetworkPolicy (optional)
 
