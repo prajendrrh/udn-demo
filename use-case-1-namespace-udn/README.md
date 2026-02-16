@@ -17,14 +17,14 @@ oc get pods -n tenant-b
 
 ## Show UDN IPs
 
-`oc get pods -o wide` shows the default cluster IP, not the UDN IP. To list each pod and its UDN IP from the pod annotation `k8s.v1.cni.cncf.io/network-status` (requires `jq`):
+`oc get pods -o wide` shows the default cluster IP, not the UDN IP. To list each pod and its UDN IP from the pod annotation `k8s.v1.cni.cncf.io/network-status` (requires `jq`). The first entry in that annotation is often the default cluster IP; we select the entry whose IP is in the UDN subnet:
 
 ```bash
 echo "=== tenant-a (UDN 192.0.2.0/24) ==="
-oc get pods -n tenant-a -l app=app-tenant-a -o json | jq -r '.items[] | .metadata.name as $n | ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson)[0].ips[0] // "?" as $ip | "\($n): \($ip)"'
+oc get pods -n tenant-a -l app=app-tenant-a -o json | jq -r '.items[] | .metadata.name + ": " + ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("192.0.2."))) | .[0].ips[0] // "?")'
 
 echo "=== tenant-b (UDN 198.51.100.0/24) ==="
-oc get pods -n tenant-b -l app=app-tenant-b -o json | jq -r '.items[] | .metadata.name as $n | ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson)[0].ips[0] // "?" as $ip | "\($n): \($ip)"'
+oc get pods -n tenant-b -l app=app-tenant-b -o json | jq -r '.items[] | .metadata.name + ": " + ((.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("198.51.100."))) | .[0].ips[0] // "?")'
 ```
 
 Example output:
@@ -47,7 +47,7 @@ From one tenant-a pod, connect to another tenant-a pod’s UDN IP. You should se
 
 ```bash
 POD_A=$(oc get pod -n tenant-a -l app=app-tenant-a -o jsonpath='{.items[0].metadata.name}')
-IP_A=$(oc get pods -n tenant-a -l app=app-tenant-a -o json | jq -r '.items[1].metadata.annotations["k8s.v1.cni.cncf.io/network-status"] | fromjson | .[0].ips[0]')
+IP_A=$(oc get pods -n tenant-a -l app=app-tenant-a -o json | jq -r '.items[1].metadata.annotations["k8s.v1.cni.cncf.io/network-status"] | fromjson | map(select(.ips[0] | startswith("192.0.2."))) | .[0].ips[0]')
 echo "From $POD_A to tenant-a UDN IP $IP_A (same namespace):"
 oc exec -n tenant-a $POD_A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_A"'/80' 2>&1; echo exit: \$?"
 ```
@@ -57,7 +57,7 @@ Expected: `Connection refused` and exit 1 (traffic reaches the pod).
 From a tenant-a pod, connect to a tenant-b pod’s UDN IP. You should see timeout (isolated).
 
 ```bash
-IP_B=$(oc get pods -n tenant-b -l app=app-tenant-b -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"] | fromjson | .[0].ips[0]')
+IP_B=$(oc get pods -n tenant-b -l app=app-tenant-b -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"] | fromjson | map(select(.ips[0] | startswith("198.51.100."))) | .[0].ips[0]')
 echo "From $POD_A to tenant-b UDN IP $IP_B (different namespace):"
 oc exec -n tenant-a $POD_A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'"$IP_B"'/80' 2>&1; echo exit: \$?"
 ```
