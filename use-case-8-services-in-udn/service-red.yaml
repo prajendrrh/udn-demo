@@ -1,0 +1,13 @@
+# Service RED: only reachable by pods on network RED (namespace red).
+apiVersion: v1
+kind: Service
+metadata:
+  name: red
+  namespace: red
+spec:
+  selector:
+    app: red
+  ports:
+    - port: 9376
+      targetPort: 9376
+      name: http

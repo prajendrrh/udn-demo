@@ -1,0 +1,10 @@
+# Use case 8: Services in UDN — BLUE and RED networks
+# Only pods on network BLUE can access Service blue; only pods on network RED can access Service red.
+resources:
+  - namespaces.yaml
+  - udn-blue.yaml
+  - udn-red.yaml
+  - deployment-blue.yaml
+  - service-blue.yaml
+  - deployment-red.yaml
+  - service-red.yaml

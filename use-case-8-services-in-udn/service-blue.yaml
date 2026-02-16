@@ -1,0 +1,13 @@
+# Service BLUE: only reachable by pods on network BLUE (namespace blue).
+apiVersion: v1
+kind: Service
+metadata:
+  name: blue
+  namespace: blue
+spec:
+  selector:
+    app: blue
+  ports:
+    - port: 9376
+      targetPort: 9376
+      name: http

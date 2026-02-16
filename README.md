@@ -63,6 +63,7 @@ Each use case creates **namespaces, network resources, and pods** (Deployments).
 | **5. Multihoming (primary UDN + secondary UDN)** | Primary + Secondary | One primary UDN and one secondary UDN per pod; two interfaces | `use-case-5-secondary-network/` |
 | **6. BGP routing** | Advanced | FRR-K8s, FRRConfiguration, custom BGP | `use-case-6-bgp-routing/` |
 | **7. Route advertisements** | Advanced | Advertise pod/CUDN routes via BGP, RouteAdvertisements CR | `use-case-7-route-advertisements/` |
+| **8. Services in UDN (BLUE/RED)** | Primary | BLUE and RED namespaces each on their own UDN; only pods on BLUE can access Service blue, only pods on RED can access Service red | `use-case-8-services-in-udn/` |
 
 ## Quick Start
 
