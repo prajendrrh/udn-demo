@@ -1,5 +1,5 @@
 # Layer2 UDN: single logical switch shared by all nodes.
-# All pods get IPs from the same subnet; good for broadcast/L2 semantics and VM clustering.
+# All pods get IPs from 100.2.0.0/24; good for broadcast/L2 semantics and VM clustering.
 apiVersion: k8s.ovn.org/v1
 kind: UserDefinedNetwork
 metadata:
@@ -10,6 +10,6 @@ spec:
   layer2:
     role: Primary
     subnets:
-      - "192.0.2.0/24"
+      - "100.2.0.0/24"
     ipam:
       lifecycle: Persistent
