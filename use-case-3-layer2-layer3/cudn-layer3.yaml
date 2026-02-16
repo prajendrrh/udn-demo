@@ -1,0 +1,18 @@
+# ClusterUserDefinedNetwork (Layer3): shared L3 network across two namespaces.
+# Pod in udn-layer3-a and pod in udn-layer3-b get IPs from 200.1.0.0/22 (per-node /26s);
+# L3 routing allows connectivity across namespaces (and nodes). Cluster-admin required.
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: cudn-layer3
+spec:
+  namespaceSelector:
+    matchLabels:
+      layer3-demo: "true"
+  network:
+    topology: Layer3
+    layer3:
+      role: Primary
+      subnets:
+        - cidr: "200.1.0.0/22"
+          hostSubnet: 26

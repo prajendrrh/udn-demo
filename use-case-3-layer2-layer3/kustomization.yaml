@@ -1,7 +1,8 @@
 # Use case 3: Layer2 vs Layer3 UDN topologies
+# Layer2: one namespace + UDN. Layer3: two namespaces + CUDN (one pod each) to show L3 connectivity.
 resources:
   - namespaces.yaml
   - udn-layer2.yaml
-  - udn-layer3.yaml
+  - cudn-layer3.yaml
   - deployment-layer2.yaml
   - deployment-layer3.yaml

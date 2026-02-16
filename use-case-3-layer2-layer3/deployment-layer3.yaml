@@ -1,11 +1,37 @@
-# Pods on Layer3 UDN (200.1.0.0/24 with per-node subnets). UBI minimal; connectivity via TCP (no NET_RAW).
+# One pod per namespace on the Layer3 CUDN (200.1.x.x). L3 connectivity across namespaces.
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app
-  namespace: udn-layer3-demo
+  namespace: udn-layer3-a
 spec:
-  replicas: 2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-layer3
+  template:
+    metadata:
+      labels:
+        app: app-layer3
+    spec:
+      containers:
+        - name: app
+          image: registry.redhat.io/ubi9/ubi-minimal:9.4
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: udn-layer3-b
+spec:
+  replicas: 1
   selector:
     matchLabels:
       app: app-layer3

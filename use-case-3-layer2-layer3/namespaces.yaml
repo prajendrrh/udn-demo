@@ -1,4 +1,5 @@
-# Namespaces for Layer2 vs Layer3 UDN comparison.
+# Namespaces for Layer2 vs Layer3 comparison.
+# Layer2: single namespace. Layer3: two namespaces sharing one CUDN (one pod each).
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -9,6 +10,15 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: udn-layer3-demo
+  name: udn-layer3-a
   labels:
     k8s.ovn.org/primary-user-defined-network: ""
+    layer3-demo: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: udn-layer3-b
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+    layer3-demo: "true"
