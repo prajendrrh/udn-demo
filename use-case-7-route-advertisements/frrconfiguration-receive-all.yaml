@@ -1,7 +1,7 @@
-# Base FRRConfiguration for route advertisements: defines BGP peer and accepts routes from it.
+# Base FRRConfiguration for route advertisements: defines BGP peer (bastion 192.168.20.10) and accepts routes from it.
 # RouteAdvertisements CRs reference this via frrConfigurationSelector (matchLabels routeAdvertisements: receive-all).
 # OVN-Kubernetes then generates additional FRRConfiguration objects to advertise pod/CUDN prefixes.
-# Replace neighbor address (e.g. 172.18.0.5) with your route reflector or BGP peer IP.
+# Bastion must advertise 192.168.20.0/24 so the cluster can route traffic to 192.168.20.1 (see use-case-6 bastion-frr-config.conf).
 # See: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/route-advertisements
 apiVersion: frrk8s.metallb.io/v1beta1
 kind: FRRConfiguration
@@ -15,8 +15,9 @@ spec:
     routers:
       - asn: 64512
         neighbors:
-          - address: 172.18.0.5
-            asn: 64512
+          - address: 192.168.20.10
+            asn: 64513
+            ebgpMultiHop: true
             disableMP: true
             toReceive:
               allowed:

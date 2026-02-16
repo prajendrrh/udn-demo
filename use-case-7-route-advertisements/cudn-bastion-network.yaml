@@ -1,0 +1,22 @@
+# ClusterUserDefinedNetwork: 192.168.20.0/24 for bastion network.
+# Pods in selected namespaces get an IP in this range; route advertisements will advertise it to the bastion (192.168.20.10).
+# Label export: "true" is required for RouteAdvertisements (advertise-cudns) to advertise this CUDN.
+# Cluster-admin required to create.
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: cudn-bastion
+  labels:
+    export: "true"
+spec:
+  namespaceSelector:
+    matchLabels:
+      udn-bastion: "true"
+  network:
+    topology: Layer2
+    layer2:
+      role: Primary
+      subnets:
+        - "192.168.20.0/24"
+      ipam:
+        lifecycle: Persistent

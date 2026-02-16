@@ -1,6 +1,12 @@
-# Use Case 7: Route Advertisements
+# Use Case 7: Route Advertisements + UDN 192.168.20.0/24
 
-Demonstrates **route advertisements** for the OVN-Kubernetes network plugin: advertising default pod network and optional **ClusterUserDefinedNetwork (CUDN)** routes to the provider network via BGP, and importing routes from the provider network. Requires a BGP provider (FRR); see [Route advertisements – OpenShift 4.21](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/route-advertisements).
+Demonstrates **route advertisements** and a **UDN on the bastion network**: cluster machine network **192.168.29.0/24**, bastion **192.168.20.10** (use case 6). This use case adds:
+
+- **CUDN** `cudn-bastion` with subnet **192.168.20.0/24** (same as bastion network).
+- A **pod** in namespace `udn-bastion-demo` on that UDN (pod gets an IP in 192.168.20.0/24).
+- **Route advertisements** enabled so the cluster advertises this UDN to the bastion and **imports routes** from the bastion (so the pod can reach 192.168.20.1).
+
+**Goal:** ping **192.168.20.1** from the pod. The bastion (use case 6) advertises 192.168.20.0/24 to the cluster so the cluster has a route to 192.168.20.1; the cluster advertises the UDN to the bastion so the bastion can reach the pod.
 
 ## What this does
 
@@ -50,18 +56,19 @@ oc patch network.operator cluster --type=merge -p '{
 ## What’s included
 
 - **Namespace** `openshift-frr-k8s` (for FRRConfiguration).
-- **FRRConfiguration** `receive-all`: base BGP peer configuration with label `routeAdvertisements: receive-all`. **Replace** `neighbor.address` (e.g. `172.18.0.5`) with your route reflector or BGP peer IP. This CR allows receiving all routes from the peer; OVN-Kubernetes generates additional FRRConfiguration objects to advertise cluster routes.
-- **RouteAdvertisements** `default`: advertises the **default cluster network** (PodNetwork + EgressIP) using the selected FRRConfiguration.
-- **RouteAdvertisements** `advertise-cudns` (optional): advertises **CUDNs** that have the label `export: "true"`. Uncomment in `kustomization.yaml` to apply. Ensure your CUDNs have that label (e.g. in metadata when creating the CUDN).
+- **Namespace** `udn-bastion-demo` (primary-UDN + `udn-bastion: "true"` for CUDN).
+- **ClusterUserDefinedNetwork** `cudn-bastion`: subnet **192.168.20.0/24**, label `export: "true"`.
+- **FRRConfiguration** `receive-all`: BGP peer **192.168.20.10** (bastion), ASN 64513, eBGP multi-hop; accepts all routes.
+- **RouteAdvertisements** `default` and `advertise-cudns`: advertise default network and CUDNs with `export: "true"`.
+- **Deployment** `udn-pod` in `udn-bastion-demo`: one pod on UDN 192.168.20.0/24 (for ping 192.168.20.1).
 
 ## Apply order
 
-1. Edit `frrconfiguration-receive-all.yaml`: set `neighbor.address` to your BGP peer/route reflector IP.
-2. Apply the base FRRConfiguration **before** any RouteAdvertisements:
+1. Complete use case 6 (FRR on bastion 192.168.20.10, FRR-K8s on cluster). Enable route advertisements (see above).
+2. Apply (namespace, CUDN, FRRConfiguration, RouteAdvertisements, deployments):
    ```bash
    oc apply -k .
    ```
-   If you only want the default network advertised, leave `route-advertisements-cudn-example.yaml` commented out in kustomization.
 
 ## Verify
 
@@ -69,30 +76,30 @@ oc patch network.operator cluster --type=merge -p '{
 # RouteAdvertisements status (cluster-scoped)
 oc get routeadvertisements
 
-# OVN-Kubernetes generates FRRConfiguration objects per node/network
-oc get frrconfiguration -n openshift-frr-k8s
-# Expect: receive-all + ovnk-generated-* entries
+# CUDN and UDN pod
+oc get cudn
+oc get pods -n udn-bastion-demo -o wide
+# Pod should have an IP in 192.168.20.0/24 (check network-status annotation if not in -o wide)
 
-# Test pod
-oc get pods -n route-adv-connectivity-demo -o wide
+# FRRConfiguration
+oc get frrconfiguration -n openshift-frr-k8s
 ```
 
 ## Test steps
 
-1. **Confirm RouteAdvertisements and generated FRRConfiguration**  
-   `oc get routeadvertisements` should show status `Accepted`. `oc get frrconfiguration -n openshift-frr-k8s` should list `receive-all` and `ovnk-generated-*` configs.
+1. **Confirm RouteAdvertisements and CUDN**  
+   `oc get routeadvertisements` should show status `Accepted`. `oc get cudn` should show `cudn-bastion`. Pod in `udn-bastion-demo` should be Running and get an IP in 192.168.20.0/24.
 
-2. **From the test pod: reach a route imported from the provider network**  
-   If your BGP peer (e.g. route reflector) advertises routes to the cluster, the test pod should be able to reach those IPs:
+2. **Ping 192.168.20.1 from the UDN pod**  
+   The pod is on the UDN 192.168.20.0/24; the bastion advertises that prefix to the cluster so the cluster can route to 192.168.20.1:
    ```bash
-   POD=$(oc get pod -n route-adv-connectivity-demo -l app=connectivity-test -o jsonpath='{.items[0].metadata.name}')
-   # Replace with an IP from a prefix your peer advertises (e.g. from the Red Hat example: 192.168.1.1)
-   oc exec -n route-adv-connectivity-demo $POD -- ping -c 2 <IMPORTED_ROUTE_IP>
+   UDN_POD=$(oc get pod -n udn-bastion-demo -l app=udn-bastion-pod -o jsonpath='{.items[0].metadata.name}')
+   oc exec -n udn-bastion-demo $UDN_POD -- ping -c 2 192.168.20.1
    ```
-   Expected: replies if the route is imported and installed.
+   Expected: replies if the route is imported from the bastion and connectivity is correct.
 
-3. **From the provider network: reach a pod IP (advertised by the cluster)**  
-   Get the test pod's IP: `oc get pod -n route-adv-connectivity-demo -l app=connectivity-test -o wide`. From a host or VM on the provider network that receives the cluster's BGP advertisements, ping that pod IP. Expected: replies (pod subnet is advertised by the cluster).
+3. **From the bastion (or 192.168.20.x): reach the UDN pod**  
+   Get the pod's UDN IP from `oc get pod -n udn-bastion-demo -l app=udn-bastion-pod -o jsonpath='{.metadata.annotations.k8s\.v1\.cni\.cncf\.io/network-status}'` (parse for 192.168.20.x). From the bastion or another host that receives the cluster's BGP advertisements, ping that IP. Expected: replies (CUDN subnet is advertised by the cluster).
 
 ## Relation to BGP (use case 6)
 

@@ -1,0 +1,9 @@
+# Namespace for pods on the bastion UDN (192.168.20.0/24).
+# Must have primary-UDN label and match CUDN namespaceSelector (udn-bastion: "true").
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: udn-bastion-demo
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+    udn-bastion: "true"

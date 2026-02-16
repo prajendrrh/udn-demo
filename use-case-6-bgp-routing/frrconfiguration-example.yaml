@@ -1,9 +1,9 @@
-# Example FRRConfiguration for BGP routing (FRR-K8s).
-# Replace placeholder IPs, ASNs, and prefixes with your environment values.
-# BGP must be enabled first: oc patch Network.operator.openshift.io/cluster --type=merge -p '{"spec":{"additionalRoutingCapabilities":{"providers":["FRR"]}}}'
+# FRRConfiguration: OpenShift peers with bastion VM (192.168.20.10).
+# Cluster nodes are on machine network 192.168.29.0/24; bastion is 192.168.20.10.
+# Prerequisites: (1) Enable FRR-K8s on OpenShift (see README). (2) Configure FRR on bastion (see bastion-frr-config.conf).
 #
-# Supported on bare metal. With MetalLB Operator, FRR-K8s is enabled automatically.
-# Ref: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/bgp-routing
+# This config: neighbor 192.168.20.10 (bastion), ASN 64513; cluster ASN 64512; eBGP multi-hop.
+# toReceive: accept all routes from bastion (so cluster learns 192.168.20.0/24 and pods can reach 192.168.20.1).
 apiVersion: frrk8s.metallb.io/v1beta1
 kind: FRRConfiguration
 metadata:
@@ -13,23 +13,14 @@ spec:
   bgp:
     routers:
       - asn: 64512
-        prefixes:
-          - 192.168.2.0/24
         neighbors:
-          - address: 172.30.0.3
-            asn: 4200000000
+          - address: 192.168.20.10
+            asn: 64513
             port: 179
             ebgpMultiHop: true
-            # Optional: advertise only specific prefixes to this neighbor
-            # toAdvertise:
-            #   allowed:
-            #     prefixes:
-            #       - 192.168.2.0/24
-            # Optional: accept only specific prefixes from this neighbor
-            # toReceive:
-            #   allowed:
-            #     mode: all
-  # Optional: limit to specific nodes
-  # nodeSelector:
-  #   labelSelector:
-  #     node-role.kubernetes.io/worker: ""
+            toReceive:
+              allowed:
+                mode: all
+        # Optional: advertise specific prefixes to bastion (e.g. for use case 7 UDN)
+        # prefixes:
+        #   - 192.168.29.0/24
