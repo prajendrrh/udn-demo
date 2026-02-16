@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: registry.redhat.io/ubi9/ubi-minimal:9.4
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false
@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: registry.redhat.io/ubi9/ubi-minimal:9.4
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false
@@ -68,7 +68,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: registry.redhat.io/ubi9/ubi-minimal:9.4
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false
