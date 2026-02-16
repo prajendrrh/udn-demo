@@ -101,13 +101,13 @@ oc get frrconfiguration -n openshift-frr-k8s
    ```
    Expected: from the bastion, ping to the pod IP (10.10.10.x) gets replies. The bastion learned 10.10.10.0/24 from the cluster via BGP and sends traffic to the cluster node.
 
-3. **Ping 192.168.20.1 from the UDN pod (outbound)**  
-   The cluster imports 192.168.20.0/24 from the bastion, so the pod can reach the bastion network:
+3. **Reach 192.168.20.1 from the UDN pod (outbound, TCP)**  
+   The cluster imports 192.168.20.0/24 from the bastion, so the pod can reach the bastion network. Use TCP (no ping/NET_RAW):
    ```bash
    UDN_POD=$(oc get pod -n udn-bastion-demo -l app=udn-bastion-pod -o jsonpath='{.items[0].metadata.name}')
-   oc exec -n udn-bastion-demo $UDN_POD -- ping -c 2 192.168.20.1
+   oc exec -n udn-bastion-demo $UDN_POD -- timeout 2 bash -c "echo >/dev/tcp/192.168.20.1/80" 2>/dev/null && echo "Reachable" || echo "Connection refused or timeout (path OK if refused)"
    ```
-   Expected: replies if 192.168.20.1 is reachable from the bastion and the cluster has the imported route.
+   Expected: connection refused (nothing on port 80) or reachable — path works if the cluster has the imported route.
 
 ## Relation to BGP (use case 6)
 

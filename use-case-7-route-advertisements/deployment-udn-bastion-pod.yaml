@@ -1,5 +1,5 @@
-# Pod on the CUDN 10.10.10.0/24. Cluster advertises this subnet to the bastion so you can ping the pod from the bastion VM.
-# busybox has ping (NET_RAW needed for ICMP).
+# Pod on the CUDN 10.10.10.0/24. Cluster advertises this subnet to the bastion so you can reach the pod from the bastion VM.
+# Same image and restricted Pod Security as other use cases (no NET_RAW; use TCP for connectivity tests).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,12 +17,12 @@ spec:
     spec:
       containers:
         - name: app
-          image: busybox:1.36
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
           command: ["sleep", "infinity"]
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
-              add: ["NET_RAW"]
+              drop: ["ALL"]
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault

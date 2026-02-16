@@ -2,6 +2,7 @@
 # Add label export: "true" to CUDNs you want to advertise (e.g. oc label cudn <name> export=true
 # does not work on CR spec; add the label to the ClusterUserDefinedNetwork metadata when creating it).
 # OVN-Kubernetes generates FRRConfiguration objects per node/network with the CUDN subnets.
+# EgressIP advertisement is not supported for Layer2 CUDNs; use PodNetwork only.
 # See: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/route-advertisements
 apiVersion: k8s.ovn.org/v1
 kind: RouteAdvertisements
@@ -10,7 +11,6 @@ metadata:
 spec:
   advertisements:
     - PodNetwork
-    - EgressIP
   networkSelectors:
     - networkSelectionType: ClusterUserDefinedNetworks
       clusterUserDefinedNetworkSelector:
