@@ -74,36 +74,6 @@ oc exec -n udn-layer3-a $POD_L3A -- bash -c "timeout 2 bash -c 'echo >/dev/tcp/'
 ```
 Expected: `Connection refused` and exit 1 (reachable via L3 routing across different subnets).
 
-## Advanced: Trace traffic flow (ovnkube-trace)
-
-OpenShift provides **ovnkube-trace** to simulate how a packet flows through OVN logical switches and routers. Use it to see the difference between Layer2 (same logical switch) and Layer3 (different switches and a router in the path).
-
-**1. Get the OVN-Kubernetes control-plane pod** (cluster-admin). The trace tool runs in the `ovnkube-cluster-manager` container:
-
-```bash
-OVN_POD=$(oc get pod -n openshift-ovn-kubernetes -l app=ovnkube-control-plane -o jsonpath='{.items[0].metadata.name}')
-```
-
-**2. Trace Layer2 flow (pod → pod, same namespace)**  
-Traffic stays on one logical switch.
-
-```bash
-POD_L2_1=$(oc get pod -n udn-layer2-demo -l app=app-layer2 -o jsonpath='{.items[0].metadata.name}')
-POD_L2_2=$(oc get pod -n udn-layer2-demo -l app=app-layer2 -o jsonpath='{.items[1].metadata.name}')
-oc exec -n openshift-ovn-kubernetes $OVN_POD -c ovnkube-cluster-manager -- ovnkube-trace -src-namespace udn-layer2-demo -src $POD_L2_1 -dst-namespace udn-layer2-demo -dst $POD_L2_2 -tcp -dst-port 80
-```
-
-**3. Trace Layer3 flow (pod in -a → pod in -b)**  
-Traffic crosses logical switches and goes through a logical router (L3).
-
-```bash
-POD_L3A=$(oc get pod -n udn-layer3-a -l app=app-layer3 -o jsonpath='{.items[0].metadata.name}')
-POD_L3B=$(oc get pod -n udn-layer3-b -l app=app-layer3 -o jsonpath='{.items[0].metadata.name}')
-oc exec -n openshift-ovn-kubernetes $OVN_POD -c ovnkube-cluster-manager -- ovnkube-trace -src-namespace udn-layer3-a -src $POD_L3A -dst-namespace udn-layer3-b -dst $POD_L3B -tcp -dst-port 80
-```
-
-Compare the output: Layer2 shows a single logical switch; Layer3 shows multiple switches and a router in the path. See [Tracing Openflow with ovnkube-trace](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/ovn-kubernetes_network_plugin/tracing-openflow-with-ovnkube-trace) (Red Hat 4.21).
-
 ## Cleanup
 
 ```bash
