@@ -75,8 +75,7 @@ oc get pods -n bgp-connectivity-demo -o wide
    ```
    Expected: replies if the route is received from the bastion and installed on the node.
 
-3. **Reach the UDN pod from the bastion (after use case 7)**  
-   Use case 7 creates a pod on UDN 10.10.10.0/24; the cluster advertises that subnet to the bastion. The bastion config uses `route-map IMPORT in` so it **accepts routes from the cluster**. From the bastion VM, ping the pod IP (10.10.10.x). See use case 7 README for how to get the pod IP and run the ping from the bastion.
+**Note:** Pinging the UDN pod (10.10.10.x) from the bastion is not part of use case 6. That is done in **use case 7** (route advertisements + CUDN 10.10.10.0/24); see use case 7 README.
 
 ## UDN and BGP
 
