@@ -1,5 +1,4 @@
 # FRRConfiguration: BGP peer to bastion (192.168.29.10). Label use-for-advertisements: true for RouteAdvertisements.
-# Edit address/prefix if your bastion IP or advertised network differs.
 apiVersion: frrk8s.metallb.io/v1beta1
 kind: FRRConfiguration
 metadata:
@@ -15,8 +14,9 @@ spec:
         neighbors:
           - address: 192.168.29.10
             asn: 64512
+            disableMP: true
             toReceive:
               allowed:
                 mode: filtered
                 prefixes:
-                  - prefix: 10.10.10.0/24
+                  - prefix: 0.0.0.0/0

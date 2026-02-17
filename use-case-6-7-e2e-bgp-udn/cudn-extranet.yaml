@@ -8,7 +8,7 @@ metadata:
 spec:
   namespaceSelector:
     matchLabels:
-      network: extranet
+      network: "extranet"
   network:
     topology: Layer2
     layer2:

@@ -5,4 +5,4 @@ metadata:
   name: extranet
   labels:
     k8s.ovn.org/primary-user-defined-network: ""
-    network: extranet
+    network: "extranet"
