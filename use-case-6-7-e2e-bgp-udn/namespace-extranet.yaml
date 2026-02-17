@@ -1,8 +1,0 @@
-# Namespace for UDN pods; must have primary-UDN label and match CUDN selector (network: extranet).
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: extranet
-  labels:
-    k8s.ovn.org/primary-user-defined-network: ""
-    network: "extranet"

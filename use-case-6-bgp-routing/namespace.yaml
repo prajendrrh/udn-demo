@@ -1,7 +1,0 @@
-# Namespace for FRRConfiguration CRs (BGP routing).
-# Required for 4.18+; FRR-K8s reads FRRConfiguration from this namespace.
-# See: https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/advanced_networking/bgp-routing
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: openshift-frr-k8s

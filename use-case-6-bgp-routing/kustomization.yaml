@@ -1,9 +1,0 @@
-# Use case 6: BGP routing (FRR-K8s / FRRConfiguration)
-# 1. Enable BGP on the cluster (see README). The cluster creates openshift-frr-k8s namespace automatically.
-# 2. Apply FRRConfiguration and test resources (edit frrconfiguration-example.yaml if needed).
-resources:
-  # openshift-frr-k8s namespace is created by the cluster when FRR is enabled; do not create it here.
-  # - namespace.yaml
-  - frrconfiguration-example.yaml
-  - namespace-connectivity-demo.yaml
-  - deployment-connectivity-test.yaml
