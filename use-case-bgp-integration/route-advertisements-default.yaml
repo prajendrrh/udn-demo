@@ -1,0 +1,20 @@
+# RouteAdvertisements: advertises default network + CUDNs with label advertise: true (e.g. extranet 10.10.10.0/24).
+apiVersion: k8s.ovn.org/v1
+kind: RouteAdvertisements
+metadata:
+  name: default
+spec:
+  targetVRF: ""
+  advertisements:
+    - PodNetwork
+  nodeSelector: {}
+  frrConfigurationSelector:
+    matchLabels:
+      use-for-advertisements: "true"
+  networkSelectors:
+    - networkSelectionType: DefaultNetwork
+    - networkSelectionType: ClusterUserDefinedNetworks
+      clusterUserDefinedNetworkSelector:
+        networkSelector:
+          matchLabels:
+            advertise: "true"

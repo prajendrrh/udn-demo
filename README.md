@@ -30,16 +30,16 @@ Before committing or sharing, ensure the following are clear for anyone running 
 | Requirement | Details |
 |-------------|---------|
 | **Cluster** | OpenShift Container Platform **4.18 or later** (UDN GA from 4.18). Nodes must use **cgroupv2** (default on RHCOS). |
-| **Access** | `oc` CLI; **cluster-admin** for CUDN (use cases 2, 6+7) and BGP/route-advertisement config; **project-admin** is enough for namespace UDN (1, 3, 4). |
+| **Access** | `oc` CLI; **cluster-admin** for CUDN (use cases 2, BGP integration) and BGP/route-advertisement config; **project-admin** is enough for namespace UDN (1, 3, 4). |
 | **Use case 4 (Overlapping IPs)** | No extra operators; two UDNs with the same subnet show overlapping pod IPs across namespaces. |
 | **Use case 5 (multihoming)** | No extra operators; primary UDN + secondary UDN on same pod. Optional **MultiNetworkPolicy** requires `useMultiNetworkPolicy` (see use-case-5 README). |
-| **Use case 6+7 (e2e BGP + UDN)** | **Bare metal**; follow the flow in `use-case-6-7-e2e-bgp-udn/README.md` (FRR on VM, enable FRR+RA, apply, test). |
+| **BGP integration** | **Bare metal**; follow the flow in `use-case-bgp-integration/README.md` (FRR on VM, enable FRR+RA, apply, test). |
 | **Use case 8 (Services in UDN)** | No extra operators; BLUE and RED namespaces on separate UDNs with Services; project-admin. |
 
 **Before you apply:**
 
 1. **Use cases 1–5, 8:** No cluster config changes required; apply with `oc apply -k <use-case-dir>/`.
-2. **Use case 6+7 (e2e):** Follow the guide in `use-case-6-7-e2e-bgp-udn/README.md` (configure FRR on VM, enable FRR+RA in OpenShift, then `oc apply -k use-case-6-7-e2e-bgp-udn/`).
+2. **BGP integration:** Follow the guide in `use-case-bgp-integration/README.md` (configure FRR on VM, enable FRR+RA in OpenShift, then `oc apply -k use-case-bgp-integration/`).
 
 **Optional before commit:** If your team uses a specific BGP peer IP or ASN, document it (e.g. in a README note or `.env.example`) so others know what to replace.
 
@@ -60,7 +60,7 @@ Each use case creates **namespaces, network resources, and pods** (Deployments).
 | **3. Layer2 vs Layer3** | Primary | Layer2 and Layer3 UDN topologies | `use-case-3-layer2-layer3/` |
 | **4. Overlapping pod IPs** | Primary | Two UDNs with the same subnet; pods in different namespaces can have the same UDN IP | `use-case-4-vm-and-policies/` |
 | **5. Multihoming (primary UDN + secondary UDN)** | Primary + Secondary | One primary UDN and one secondary UDN per pod; two interfaces | `use-case-5-secondary-network/` |
-| **6+7. BGP + UDN + Route Advertisements (e2e)** | Advanced | FRR on VM → enable FRR/RA in OpenShift → UDN → FRRConfiguration + RouteAdvertisements → pods | `use-case-6-7-e2e-bgp-udn/` |
+| **BGP integration** | Advanced | FRR on VM → enable FRR/RA in OpenShift → UDN → FRRConfiguration + RouteAdvertisements → pods | `use-case-bgp-integration/` |
 | **8. Services in UDN (BLUE/RED)** | Primary | BLUE and RED namespaces each on their own UDN; only pods on BLUE can access Service blue, only pods on RED can access Service red | `use-case-8-services-in-udn/` |
 
 ## Quick Start
@@ -83,8 +83,8 @@ oc apply -k use-case-4-vm-and-policies/
 # Use case 5: Multihoming (primary UDN + secondary UDN)
 oc apply -k use-case-5-secondary-network/
 
-# Use case 6+7: BGP + UDN + Route Advertisements (see use-case-6-7-e2e-bgp-udn/README.md)
-oc apply -k use-case-6-7-e2e-bgp-udn/
+# BGP integration (see use-case-bgp-integration/README.md)
+oc apply -k use-case-bgp-integration/
 
 # Use case 8: Services in UDN (BLUE/RED — service isolation by network)
 oc apply -k use-case-8-services-in-udn/
