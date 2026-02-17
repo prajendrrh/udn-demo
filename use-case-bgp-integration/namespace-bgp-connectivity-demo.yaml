@@ -1,5 +1,0 @@
-# Namespace for a pod on the default network (reach routes learned via BGP, e.g. 172.20.0.1 on bastion network).
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: bgp-connectivity-demo
