@@ -7,6 +7,4 @@ resources:
   - cudn-extranet.yaml
   - frrconfiguration-bastion.yaml
   - route-advertisements-default.yaml
-  - namespace-bgp-connectivity-demo.yaml
-  - deployment-connectivity-test.yaml
   - deployment-udn-pod.yaml

@@ -1,6 +1,6 @@
 # Use Case: BGP Integration
 
-Bastion **192.168.29.10** as route reflector; cluster nodes (FRR-K8s) peer with it. Cluster receives **0.0.0.0/0** from the bastion. UDN **extranet** is **10.10.10.0/24**; RouteAdvertisements advertises it so the bastion can reach pods. Edit neighbor IPs in `bastion-frr-config.conf` to match your nodes: `oc get pods -n openshift-frr-k8s -o wide`.
+Bastion **192.168.29.10** as route reflector; cluster nodes (FRR-K8s) peer with it. UDN **extranet** is **10.10.10.0/24**; RouteAdvertisements advertises it so the bastion can reach pods. Edit neighbor IPs in `bastion-frr-config.conf` to match your nodes: `oc get pods -n openshift-frr-k8s -o wide`.
 
 ---
 
@@ -46,22 +46,21 @@ Edit `frrconfiguration-bastion.yaml` if needed (bastion IP 192.168.29.10, toRece
 oc apply -k use-case-bgp-integration/
 ```
 
-Creates: namespace **extranet** and **bgp-connectivity-demo**, CUDN **extranet** (10.10.10.0/24), FRRConfiguration **receive-filtered**, RouteAdvertisements **default**, deployments **connectivity-test** and **udn-pod**.
+Creates: namespace **extranet**, CUDN **extranet** (10.10.10.0/24), FRRConfiguration **receive-filtered**, RouteAdvertisements **default**, deployment **udn-pod**.
 
 **Verify:** `oc get ra`, `oc get cudn`, `oc get frrconfiguration -n openshift-frr-k8s`
 
 ---
 
-## Step 4: Test
+## Step 4: Test (Bastion → UDN pod)
 
-**Pod → outside (default route):**
+Get the UDN pod IP (10.10.10.x):
 
 ```bash
-POD=$(oc get pod -n bgp-connectivity-demo -l app=connectivity-test -o jsonpath='{.items[0].metadata.name}')
-oc exec -n bgp-connectivity-demo $POD -- timeout 2 bash -c "echo >/dev/tcp/8.8.8.8/53" 2>/dev/null && echo "Reachable" || echo "Timeout"
+oc get pod -n extranet -l app=udn-bastion-pod -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"]' | jq -r '.[] | select(.ips[0] | startswith("10.10.10.")) | .ips[0]'
 ```
 
-**Bastion → UDN pod:** Get pod IP: `oc get pod -n extranet -l app=udn-bastion-pod -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"]' | jq -r '.[] | select(.ips[0] | startswith("10.10.10.")) | .ips[0]'` then from bastion: `ping -c 2 <that-ip>`.
+From the **bastion VM**, ping that IP: `ping -c 2 <that-ip>`. The bastion learns 10.10.10.0/24 from the cluster via BGP.
 
 ---
 
