@@ -1,0 +1,27 @@
+# Server pod in np-udn-a (UDN 100.20.0.0/24). NetworkPolicy allows ingress only from np-udn-b.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: np-udn-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+        - name: app
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
+          command: ["sleep", "infinity"]
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

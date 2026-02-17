@@ -1,0 +1,16 @@
+# Two namespaces, each with its own primary UDN. NetworkPolicy will restrict traffic between them.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: np-udn-a
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+    np-udn-demo: "a"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: np-udn-b
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""
+    np-udn-demo: "b"

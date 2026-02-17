@@ -1,0 +1,10 @@
+# Network policies with UDN: two namespaces on different UDNs, NetworkPolicy allows only np-udn-b → server in np-udn-a.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces.yaml
+  - udn-a.yaml
+  - udn-b.yaml
+  - deployment-server.yaml
+  - deployment-client.yaml
+  - network-policy-allow-from-b.yaml

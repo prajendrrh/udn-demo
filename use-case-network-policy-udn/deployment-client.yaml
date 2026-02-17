@@ -1,0 +1,27 @@
+# Client pod in np-udn-b (UDN 100.21.0.0/24). Used to test connectivity to server in np-udn-a.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  namespace: np-udn-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+        - name: app
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
+          command: ["sleep", "infinity"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

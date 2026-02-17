@@ -34,11 +34,12 @@ Before committing or sharing, ensure the following are clear for anyone running 
 | **Use case 4 (Overlapping IPs)** | No extra operators; two UDNs with the same subnet show overlapping pod IPs across namespaces. |
 | **Use case 5 (multihoming)** | No extra operators; primary UDN + secondary UDN on same pod. Optional **MultiNetworkPolicy** requires `useMultiNetworkPolicy` (see use-case-5 README). |
 | **BGP integration** | **Bare metal**; follow the flow in `use-case-bgp-integration/README.md` (FRR on VM, enable FRR+RA, apply, test). |
+| **NetworkPolicy with UDN** | No extra operators; two namespaces on UDN, NetworkPolicy allows only np-udn-b → server in np-udn-a; project-admin. |
 | **Use case 8 (Services in UDN)** | No extra operators; BLUE and RED namespaces on separate UDNs with Services; project-admin. |
 
 **Before you apply:**
 
-1. **Use cases 1–5, 8:** No cluster config changes required; apply with `oc apply -k <use-case-dir>/`.
+1. **Use cases 1–5, 8, NetworkPolicy with UDN:** No cluster config changes required; apply with `oc apply -k <use-case-dir>/`.
 2. **BGP integration:** Follow the guide in `use-case-bgp-integration/README.md` (configure FRR on VM, enable FRR+RA in OpenShift, then `oc apply -k use-case-bgp-integration/`).
 
 **Optional before commit:** If your team uses a specific BGP peer IP or ASN, document it (e.g. in a README note or `.env.example`) so others know what to replace.
@@ -60,6 +61,7 @@ Each use case creates **namespaces, network resources, and pods** (Deployments).
 | **3. Layer2 vs Layer3** | Primary | Layer2 and Layer3 UDN topologies | `use-case-3-layer2-layer3/` |
 | **4. Overlapping pod IPs** | Primary | Two UDNs with the same subnet; pods in different namespaces can have the same UDN IP | `use-case-4-vm-and-policies/` |
 | **5. Multihoming (primary UDN + secondary UDN)** | Primary + Secondary | One primary UDN and one secondary UDN per pod; two interfaces | `use-case-5-secondary-network/` |
+| **NetworkPolicy with UDN** | Primary | Two namespaces on different UDNs; NetworkPolicy allows ingress to server only from the other namespace | `use-case-network-policy-udn/` |
 | **BGP integration** | Advanced | FRR on VM → enable FRR/RA in OpenShift → UDN → FRRConfiguration + RouteAdvertisements → pods | `use-case-bgp-integration/` |
 | **8. Services in UDN (BLUE/RED)** | Primary | BLUE and RED namespaces each on their own UDN; only pods on BLUE can access Service blue, only pods on RED can access Service red | `use-case-8-services-in-udn/` |
 
@@ -82,6 +84,9 @@ oc apply -k use-case-4-vm-and-policies/
 
 # Use case 5: Multihoming (primary UDN + secondary UDN)
 oc apply -k use-case-5-secondary-network/
+
+# NetworkPolicy with UDN (see use-case-network-policy-udn/README.md)
+oc apply -k use-case-network-policy-udn/
 
 # BGP integration (see use-case-bgp-integration/README.md)
 oc apply -k use-case-bgp-integration/
