@@ -21,11 +21,12 @@ Wait for pods: `oc get pods -n np-udn-demo`
 
 ## Test
 
-1. **Get server UDN IP** (100.20.0.x):
+1. **Get server IP** (in a UDN-only namespace this is the pod’s primary IP):
    ```bash
-   SERVER_IP=$(oc get pod -n np-udn-demo -l app=server -o json | jq -r '.items[0].metadata.annotations["k8s.v1.cni.cncf.io/network-status"]' | jq -r '.[] | select(.ips[0] | startswith("100.20.0.")) | .ips[0]')
+   SERVER_IP=$(oc get pod -n np-udn-demo -l app=server -o jsonpath='{.items[0].status.podIP}')
    echo $SERVER_IP
    ```
+   If that’s empty, wait for the server pod to be Running and try again.
 
 2. **From client pod — TCP to server (port 80, allowed by policy):**
    ```bash
@@ -38,7 +39,7 @@ Wait for pods: `oc get pods -n np-udn-demo`
    ```bash
    oc exec -n np-udn-demo $CLIENT -- curl -s -m 2 http://$SERVER_IP/
    ```
-   Expected: nginx HTML (or "Reachable" if curl not available).
+   Expected: nginx HTML (or “Reachable” if curl isn’t available).
 
 ## Cleanup
 
