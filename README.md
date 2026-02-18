@@ -35,11 +35,12 @@ Before committing or sharing, ensure the following are clear for anyone running 
 | **Use case 5 (multihoming)** | No extra operators; primary UDN + secondary UDN on same pod. Optional **MultiNetworkPolicy** requires `useMultiNetworkPolicy` (see use-case-5 README). |
 | **BGP integration** | **Bare metal**; follow the flow in `use-case-bgp-integration/README.md` (FRR on VM, enable FRR+RA, apply, test). |
 | **NetworkPolicy with UDN** | No extra operators; two namespaces on UDN, NetworkPolicy allows only np-udn-b → server in np-udn-a; project-admin. |
+| **UDN Services** | No extra operators; documents Service accessibility (default vs UDN, one service CIDR, KAPI/DNS exception) with a small demo; project-admin. |
 | **Use case 8 (Services in UDN)** | No extra operators; BLUE and RED namespaces on separate UDNs with Services; project-admin. |
 
 **Before you apply:**
 
-1. **Use cases 1–5, 8, NetworkPolicy with UDN:** No cluster config changes required; apply with `oc apply -k <use-case-dir>/`.
+1. **Use cases 1–5, 8, NetworkPolicy with UDN, UDN Services:** No cluster config changes required; apply with `oc apply -k <use-case-dir>/`.
 2. **BGP integration:** Follow the guide in `use-case-bgp-integration/README.md` (configure FRR on VM, enable FRR+RA in OpenShift, then `oc apply -k use-case-bgp-integration/`).
 
 **Optional before commit:** If your team uses a specific BGP peer IP or ASN, document it (e.g. in a README note or `.env.example`) so others know what to replace.
@@ -63,6 +64,7 @@ Each use case creates **namespaces, network resources, and pods** (Deployments).
 | **5. Multihoming (primary UDN + secondary UDN)** | Primary + Secondary | One primary UDN and one secondary UDN per pod; two interfaces | `use-case-5-secondary-network/` |
 | **NetworkPolicy with UDN** | Primary | Two namespaces on different UDNs; NetworkPolicy allows ingress to server only from the other namespace | `use-case-network-policy-udn/` |
 | **BGP integration** | Advanced | FRR on VM → enable FRR/RA in OpenShift → UDN → FRRConfiguration + RouteAdvertisements → pods | `use-case-bgp-integration/` |
+| **UDN Services** | Primary | Service accessibility rules (default vs UDN, one service CIDR, KAPI/DNS exception); demo with default-demo and udn-demo namespaces | `use-case-udn-services/` |
 | **8. Services in UDN (BLUE/RED)** | Primary | BLUE and RED namespaces each on their own UDN; only pods on BLUE can access Service blue, only pods on RED can access Service red | `use-case-8-services-in-udn/` |
 
 ## Quick Start
@@ -90,6 +92,9 @@ oc apply -k use-case-network-policy-udn/
 
 # BGP integration (see use-case-bgp-integration/README.md)
 oc apply -k use-case-bgp-integration/
+
+# UDN Services (accessibility rules + demo: default vs UDN service)
+oc apply -k use-case-udn-services/
 
 # Use case 8: Services in UDN (BLUE/RED — service isolation by network)
 oc apply -k use-case-8-services-in-udn/

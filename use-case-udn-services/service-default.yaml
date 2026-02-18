@@ -1,0 +1,13 @@
+# Service on default network. Accessible only from namespaces on the default network.
+apiVersion: v1
+kind: Service
+metadata:
+  name: default-svc
+  namespace: default-demo
+spec:
+  selector:
+    app: default-app
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http

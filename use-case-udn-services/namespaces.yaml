@@ -1,0 +1,13 @@
+# default-demo: on cluster default network (no primary UDN label).
+# udn-demo: on UDN (primary-UDN label).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: default-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: udn-demo
+  labels:
+    k8s.ovn.org/primary-user-defined-network: ""

@@ -1,0 +1,14 @@
+# UserDefinedNetwork for udn-demo. Pods get IPs from 100.30.0.0/24.
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: udn-demo-net
+  namespace: udn-demo
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    subnets:
+      - "100.30.0.0/24"
+    ipam:
+      lifecycle: Persistent

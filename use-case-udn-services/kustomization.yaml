@@ -1,0 +1,11 @@
+# UDN Services: documents accessibility rules and demos default vs UDN service reachability.
+# Use: oc apply -k use-case-udn-services/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces.yaml
+  - udn-demo-network.yaml
+  - deployment-default.yaml
+  - service-default.yaml
+  - deployment-udn.yaml
+  - service-udn.yaml
