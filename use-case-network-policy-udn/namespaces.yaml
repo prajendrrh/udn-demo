@@ -1,4 +1,5 @@
-# Two namespaces, each with its own primary UDN. NetworkPolicy will restrict traffic between them.
+# Both namespaces share the same UDN (via CUDN selector) so pods can route to each other.
+# np-udn-demo: "a" / "b" is used by NetworkPolicy to allow only B → server in A.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -6,6 +7,7 @@ metadata:
   labels:
     k8s.ovn.org/primary-user-defined-network: ""
     np-udn-demo: "a"
+    udn-shared: "true"
 ---
 apiVersion: v1
 kind: Namespace
@@ -14,3 +16,4 @@ metadata:
   labels:
     k8s.ovn.org/primary-user-defined-network: ""
     np-udn-demo: "b"
+    udn-shared: "true"

@@ -1,14 +1,18 @@
 # Use Case: NetworkPolicy with UDN
 
-Demonstrates **NetworkPolicy** on **User-Defined Networks**: two namespaces each with a primary UDN. A NetworkPolicy in **np-udn-a** allows ingress to the **server** pod only from namespace **np-udn-b**. The **client** pod in np-udn-b can reach the server; other namespaces cannot.
+Demonstrates **NetworkPolicy** on **User-Defined Networks**: two namespaces (**np-udn-a** and **np-udn-b**) both attached to the **same** UDN via one **ClusterUserDefinedNetwork** (subnet 100.20.0.0/24), so pods can route to each other. A NetworkPolicy in np-udn-a allows ingress to the **server** pod only from namespace **np-udn-b**. The **client** pod in np-udn-b can reach the server; other namespaces cannot.
+
+**Why both namespaces share one UDN:** Different UDNs are isolated at the network level (no routing between them). For NetworkPolicy to allow/deny traffic, the namespaces must be on the same network; the policy then restricts who can reach the server.
 
 ## What’s included
 
 | Resource | Purpose |
 |----------|--------|
-| **np-udn-a** | Namespace, UDN 100.20.0.0/24, deployment **server** (label `app=server`, port 8080) |
-| **np-udn-b** | Namespace, UDN 100.21.0.0/24, deployment **client** (label `app=client`) |
-| **NetworkPolicy** `allow-server-from-np-udn-b` | In np-udn-a: allow ingress to `app=server` only from namespaces with label `np-udn-demo: "b"` (np-udn-b), port 8080 |
+| **np-udn-a**, **np-udn-b** | Namespaces with label `udn-shared: "true"` (selected by CUDN) and `np-udn-demo: "a"` / `"b"` (for NetworkPolicy) |
+| **CUDN** `np-udn-shared` | One UDN 100.20.0.0/24 for both namespaces so they can reach each other |
+| **Server** (np-udn-a) | Listens on port 8080 (agnhost serve-hostname); label `app=server` |
+| **Client** (np-udn-b) | Label `app=client`; used to test connectivity to server |
+| **NetworkPolicy** `allow-server-from-np-udn-b` | In np-udn-a: allow ingress to `app=server` only from namespaces with label `np-udn-demo: "b"`, port 8080 |
 
 ## Apply
 

@@ -1,4 +1,4 @@
-# Server pod in np-udn-a (UDN 100.20.0.0/24). NetworkPolicy allows ingress only from np-udn-b.
+# Server pod in np-udn-a. Listens on 8080. NetworkPolicy allows ingress only from np-udn-b.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: app
-          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
-          command: ["sleep", "infinity"]
+          image: registry.k8s.io/e2e-test-images/agnhost:2.45
+          args: ["serve-hostname", "--http-port", "8080", "--udp-port", "-1"]
           ports:
             - containerPort: 8080
           securityContext:
