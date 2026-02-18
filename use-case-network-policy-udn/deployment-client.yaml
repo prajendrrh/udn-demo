@@ -1,9 +1,9 @@
-# Client pod in np-udn-b (same UDN 100.20.0.0/24 as np-udn-a). Used to test connectivity to server in np-udn-a.
+# Client pod. Only this pod can reach the server (NetworkPolicy allows ingress to server from app=client).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: client
-  namespace: np-udn-b
+  namespace: np-udn-demo
 spec:
   replicas: 1
   selector:

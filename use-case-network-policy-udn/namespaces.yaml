@@ -1,19 +1,7 @@
-# Both namespaces share the same UDN (via CUDN selector) so pods can route to each other.
-# np-udn-demo: "a" / "b" is used by NetworkPolicy to allow only B → server in A.
+# Single namespace on one UDN. Server and client in same namespace; NetworkPolicy allows only client → server.
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: np-udn-a
+  name: np-udn-demo
   labels:
     k8s.ovn.org/primary-user-defined-network: ""
-    np-udn-demo: "a"
-    udn-shared: "true"
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: np-udn-b
-  labels:
-    k8s.ovn.org/primary-user-defined-network: ""
-    np-udn-demo: "b"
-    udn-shared: "true"

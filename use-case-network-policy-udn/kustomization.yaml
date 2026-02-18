@@ -1,10 +1,10 @@
-# Network policies with UDN: both namespaces on the same UDN (one CUDN) so they can route;
-# NetworkPolicy allows only np-udn-b → server in np-udn-a.
+# NetworkPolicy with UDN: one namespace, one UDN. Server (nginx:80) and client in same namespace.
+# NetworkPolicy allows only client pods to reach the server.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespaces.yaml
-  - cudn-shared.yaml
+  - udn-demo.yaml
   - deployment-server.yaml
   - deployment-client.yaml
   - network-policy-allow-from-b.yaml
