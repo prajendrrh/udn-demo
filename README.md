@@ -60,7 +60,7 @@ Each use case creates **namespaces, network resources, and pods** (Deployments).
 | **1. Namespace UDN** | Primary | Single-tenant isolation with a UserDefinedNetwork per namespace | `use-case-1-namespace-udn/` |
 | **2. Cluster UDN** | Primary | Multi-namespace shared network with ClusterUserDefinedNetwork | `use-case-2-cluster-udn/` |
 | **3. Layer2 vs Layer3** | Primary | Layer2 and Layer3 UDN topologies | `use-case-3-layer2-layer3/` |
-| **4. Overlapping pod IPs** | Primary | Two UDNs with the same subnet; pods in different namespaces can have the same UDN IP | `use-case-4-vm-and-policies/` |
+| **4. Overlapping pod IPs** | Primary | Two UDNs with the same subnet; pods in different namespaces can have the same UDN IP | `use-case-4-overlapping-pod-ips/` |
 | **5. Multihoming (primary UDN + secondary UDN)** | Primary + Secondary | One primary UDN and one secondary UDN per pod; two interfaces | `use-case-5-secondary-network/` |
 | **NetworkPolicy with UDN** | Primary | Two namespaces on different UDNs; NetworkPolicy allows ingress to server only from the other namespace | `use-case-network-policy-udn/` |
 | **BGP integration** | Advanced | FRR on VM → enable FRR/RA in OpenShift → UDN → FRRConfiguration + RouteAdvertisements → pods | `use-case-bgp-integration/` |
@@ -82,7 +82,7 @@ oc apply -k use-case-2-cluster-udn/
 oc apply -k use-case-3-layer2-layer3/
 
 # Use case 4: Overlapping pod IPs (two UDNs, same subnet)
-oc apply -k use-case-4-vm-and-policies/
+oc apply -k use-case-4-overlapping-pod-ips/
 
 # Use case 5: Multihoming (primary UDN + secondary UDN)
 oc apply -k use-case-5-secondary-network/
