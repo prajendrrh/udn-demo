@@ -1,4 +1,5 @@
 # Pod on UDN 100.30.0.0/24. Service udn-svc is reachable only from this namespace. Pod can still reach KAPI and DNS.
+# Same image/pattern as use-case-8: agnhost serve-hostname on 9376 (services and HTTP).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,9 +18,10 @@ spec:
       containers:
         - name: app
           image: registry.k8s.io/e2e-test-images/agnhost:2.45
-          args: ["serve-hostname", "--http-port", "8080", "--udp-port", "-1"]
+          args:
+            - serve-hostname
           ports:
-            - containerPort: 8080
+            - containerPort: 9376
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true

@@ -1,4 +1,4 @@
-# NetworkPolicy with UDN: one namespace, one UDN. Server (nginx:80) and client in same namespace.
+# NetworkPolicy with UDN: one namespace, one UDN. Server and client use agnhost (serve-hostname on 9376).
 # NetworkPolicy allows only client pods to reach the server.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

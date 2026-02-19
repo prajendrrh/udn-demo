@@ -47,26 +47,26 @@ Wait for pods: `oc get pods -n default-demo` and `oc get pods -n udn-demo`.
 1. **Default pod → default Service (same network) — should succeed**
    ```bash
    POD=$(oc get pod -n default-demo -l app=default-app -o jsonpath='{.items[0].metadata.name}')
-   oc exec -n default-demo $POD -- curl -s -m 3 http://default-svc:8080
+   oc exec -n default-demo $POD -- curl -s -m 3 http://default-svc:9376
    ```
    Expected: response from the server (e.g. hostname).
 
 2. **Default pod → UDN Service (different network) — should fail**
    ```bash
-   oc exec -n default-demo $POD -- curl -s -m 3 http://udn-svc.udn-demo.svc.cluster.local:8080 || echo "Expected: unreachable"
+   oc exec -n default-demo $POD -- curl -s -m 3 http://udn-svc.udn-demo.svc.cluster.local:9376 || echo "Expected: unreachable"
    ```
    Expected: timeout or failure. Default network cannot reach UDN services.
 
 3. **UDN pod → UDN Service (same network) — should succeed**
    ```bash
    UDN_POD=$(oc get pod -n udn-demo -l app=udn-app -o jsonpath='{.items[0].metadata.name}')
-   oc exec -n udn-demo $UDN_POD -- curl -s -m 3 http://udn-svc:8080
+   oc exec -n udn-demo $UDN_POD -- curl -s -m 3 http://udn-svc:9376
    ```
    Expected: response. Only pods on this UDN can reach udn-svc.
 
 4. **UDN pod → default Service (different network) — should fail**
    ```bash
-   oc exec -n udn-demo $UDN_POD -- curl -s -m 3 http://default-svc.default-demo.svc.cluster.local:8080 || echo "Expected: unreachable"
+   oc exec -n udn-demo $UDN_POD -- curl -s -m 3 http://default-svc.default-demo.svc.cluster.local:9376 || echo "Expected: unreachable"
    ```
    Expected: timeout or failure. UDN cannot reach default-network services.
 
