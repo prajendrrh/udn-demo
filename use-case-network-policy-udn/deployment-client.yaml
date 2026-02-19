@@ -1,4 +1,4 @@
-# Client pod. Only this pod can reach the server (NetworkPolicy allows ingress to server from app=client).
+# Client pod: same image as use-case-8 (agnhost has curl). Used to test connectivity to server.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,13 +15,12 @@ spec:
         app: client
     spec:
       containers:
-        - name: app
-          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
-          command: ["sleep", "infinity"]
+        - name: client
+          image: registry.k8s.io/e2e-test-images/agnhost:2.45
+          args:
+            - serve-hostname
           securityContext:
             allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault

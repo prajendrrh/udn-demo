@@ -1,5 +1,5 @@
-# Server in same namespace as client. Listens on 8080. NetworkPolicy allows ingress only from app=client.
-# Uses same image as client so it pulls; listens with nc.
+# Server pod: same image and pattern as use-case-8 (agnhost serve-hostname on 9376).
+# NetworkPolicy allows ingress only from app=client.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,15 +16,14 @@ spec:
         app: server
     spec:
       containers:
-        - name: app
-          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
-          command: ["sh", "-c", "while true; do nc -l -p 8080; done"]
+        - name: server
+          image: registry.k8s.io/e2e-test-images/agnhost:2.45
+          args:
+            - serve-hostname
           ports:
-            - containerPort: 8080
+            - containerPort: 9376
           securityContext:
             allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
