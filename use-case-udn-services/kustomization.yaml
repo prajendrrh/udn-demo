@@ -1,4 +1,4 @@
-# UDN Services: documents accessibility rules and demos default vs UDN service reachability.
+# Services: default network vs UDN. Demos service reachability (default vs one UDN, KAPI/DNS exception).
 # Use: oc apply -k use-case-udn-services/
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

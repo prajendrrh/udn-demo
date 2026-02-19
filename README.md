@@ -50,12 +50,12 @@ One primary UDN and one secondary UDN per pod; pod gets two interfaces. Optional
 One namespace on a UDN; server and client pods. NetworkPolicy allows ingress to the server only from the client pod.  
 *Pre-req: project-admin.*
 
-**UDN Services** — `use-case-udn-services/`  
-Documents Service accessibility: default vs UDN, one service CIDR, KAPI/DNS exception. Demo with default-demo and udn-demo namespaces.  
+**Services: default network vs UDN** — `use-case-udn-services/`  
+One namespace on the **default** network and one on a **single UDN**. Shows that Services on the default network are reachable only from default-network pods, Services on a UDN only from that UDN’s pods, and that UDN pods can still reach KAPI and DNS.  
 *Pre-req: project-admin.*
 
-**Services in UDN (BLUE/RED)** — `use-case-8-services-in-udn/`  
-BLUE and RED namespaces each on their own UDN with a Service. Only pods on BLUE can access Service blue; only pods on RED can access Service red.  
+**Services: two UDNs (BLUE and RED)** — `use-case-8-services-in-udn/`  
+Two namespaces, each on a **different UDN** (BLUE and RED; no default network in this demo). Only pods on BLUE can reach Service blue; only pods on RED can reach Service red. Shows service isolation **between** UDNs.  
 *Pre-req: project-admin.*
 
 **BGP integration** — `use-case-bgp-integration/`  

@@ -1,6 +1,6 @@
-# Use Case 8: Services in UDN (BLUE and RED)
+# Services: two UDNs (BLUE and RED)
 
-Demonstrates **service isolation by UDN**: namespace **BLUE** is on network **BLUE**, and namespace **RED** is on network **RED**. Each namespace has a Kubernetes Service and pods that serve HTTP. Only pods on the same network can reach that network’s service.
+This use case demonstrates **service isolation between two UDNs**. Namespace **blue** is on UDN BLUE, namespace **red** on UDN RED (no default network in this demo). Each has a Service and pods; only pods on the same UDN can reach that UDN’s service—BLUE cannot reach Service red, RED cannot reach Service blue. (For **default network vs one UDN**, see `use-case-udn-services/`.)
 
 | Namespace | Network (UDN) | Subnet       | Service  |
 |-----------|---------------|--------------|----------|

@@ -1,5 +1,4 @@
-# Use case 8: Services in UDN — BLUE and RED networks
-# Only pods on network BLUE can access Service blue; only pods on network RED can access Service red.
+# Services: two UDNs (BLUE and RED). Only pods on BLUE can access Service blue; only pods on RED can access Service red.
 # Use: oc apply -k use-case-8-services-in-udn/  (do not use -f; order matters)
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
