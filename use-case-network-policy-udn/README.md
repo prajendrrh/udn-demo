@@ -21,21 +21,27 @@ Wait for pods: `oc get pods -n np-udn-demo`
 
 ## Test
 
-1. **Get server IP** (in a UDN-only namespace this is the pod’s primary IP):
+1. **Ensure the server pod exists and is Running:**
    ```bash
-   SERVER_IP=$(oc get pod -n np-udn-demo -l app=server -o jsonpath='{.items[0].status.podIP}')
-   echo $SERVER_IP
+   oc get pods -n np-udn-demo -l app=server
    ```
-   If that’s empty, wait for the server pod to be Running and try again.
+   If the list is empty or the pod is not `Running`, wait for the deployment (or run `oc get pods -n np-udn-demo` and fix any ImagePullBackOff / CrashLoopBackOff).
 
-2. **From client pod — TCP to server (port 80, allowed by policy):**
+2. **Get server UDN IP** (safe when no pods yet — returns empty instead of error):
    ```bash
-   CLIENT=$(oc get pod -n np-udn-demo -l app=client -o jsonpath='{.items[0].metadata.name}')
+   SERVER_IP=$(oc get pods -n np-udn-demo -l app=server -o json | jq -r '.items[0] | if . == null then empty else ( (.metadata.annotations["k8s.v1.cni.cncf.io/network-status"] // "[]") | fromjson | map(select(.ips[0] | startswith("100.20.0."))) | .[0].ips[0] ) // .status.podIP end')
+   echo "Server IP: $SERVER_IP"
+   ```
+   This uses the network-status annotation (UDN 100.20.0.x) when present, otherwise `status.podIP`. If `SERVER_IP` is empty, the server pod is not ready yet.
+
+3. **From client pod — TCP to server (port 80, allowed by policy):**
+   ```bash
+   CLIENT=$(oc get pods -n np-udn-demo -l app=client -o json | jq -r '.items[0].metadata.name // empty')
    oc exec -n np-udn-demo $CLIENT -- timeout 2 bash -c "echo >/dev/tcp/$SERVER_IP/80" 2>/dev/null && echo "Reachable" || echo "Timeout"
    ```
    Expected: **Reachable**.
 
-3. **Optional — from client, curl the server:**
+4. **Optional — from client, curl the server:**
    ```bash
    oc exec -n np-udn-demo $CLIENT -- curl -s -m 2 http://$SERVER_IP/
    ```
