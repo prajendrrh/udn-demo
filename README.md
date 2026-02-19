@@ -26,8 +26,8 @@ Each use case has its own directory with a README (apply steps, test, cleanup). 
 
 ---
 
-**Namespace UDN** — `use-case-1-namespace-udn/`  
-Single-tenant isolation: one UserDefinedNetwork per namespace (e.g. tenant-a, tenant-b). Pods get UDN IPs; namespaces are isolated.  
+**Tenant isolation** — `use-case-tenant-isolation/`  
+One UserDefinedNetwork per namespace (e.g. tenant-a, tenant-b). Pods get UDN IPs; namespaces are isolated.  
 *Pre-req: project-admin.*
 
 **Cluster UDN** — `use-case-2-cluster-udn/`  
@@ -69,7 +69,7 @@ Advanced: FRR on a VM, enable FRR/route-advertisement in OpenShift, UDN + FRRCon
 Apply any use case (directory path as above):
 
 ```bash
-oc apply -k use-case-1-namespace-udn/
+oc apply -k use-case-tenant-isolation/
 oc apply -k use-case-2-cluster-udn/
 oc apply -k use-case-3-layer2-layer3/
 oc apply -k use-case-4-overlapping-pod-ips/
