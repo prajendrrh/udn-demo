@@ -47,7 +47,7 @@ One namespace on a UDN; server and client pods. NetworkPolicy allows ingress to 
 **Services: default network vs UDN** — `use-case-services-default-vs-udn/`  
 One namespace on the **default** network and one on a **single UDN**. Shows that Services on the default network are reachable only from default-network pods, Services on a UDN only from that UDN’s pods, and that UDN pods can still reach KAPI and DNS.
 
-**Services: two UDNs (BLUE and RED)** — `use-case-8-services-isolated/`  
+**Services: two UDNs (BLUE and RED)** — `use-case-services-isolated/`  
 Two namespaces, each on a **different UDN** (BLUE and RED; no default network in this demo). Only pods on BLUE can reach Service blue; only pods on RED can reach Service red. Shows service isolation **between** UDNs.
 
 **BGP integration** — `use-case-bgp-integration/`  
@@ -67,7 +67,7 @@ oc apply -k use-case-overlapping-pod-ips/
 oc apply -k use-case-multi-homing/
 oc apply -k use-case-network-policy-udn/
 oc apply -k use-case-services-default-vs-udn/
-oc apply -k use-case-8-services-isolated/
+oc apply -k use-case-services-isolated/
 oc apply -k use-case-bgp-integration/
 ```
 

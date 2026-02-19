@@ -1,6 +1,6 @@
 # Services: default network vs UDN
 
-This use case shows how **Kubernetes Services** behave when you have both the **default network** and **one UDN**: one namespace on the default network (default-demo) and one on a UDN (udn-demo). It documents the rules and provides a small demo. (For service isolation **between two UDNs**, see `use-case-8-services-isolated/`.)
+This use case shows how **Kubernetes Services** behave when you have both the **default network** and **one UDN**: one namespace on the default network (default-demo) and one on a UDN (udn-demo). It documents the rules and provides a small demo. (For service isolation **between two UDNs**, see `use-case-services-isolated/`.)
 
 ---
 
