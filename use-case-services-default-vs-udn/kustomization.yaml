@@ -1,0 +1,11 @@
+# Services: default network vs UDN. Demos service reachability (default vs one UDN, KAPI/DNS exception).
+# Use: oc apply -k use-case-services-default-vs-udn/
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces.yaml
+  - udn-demo-network.yaml
+  - deployment-default.yaml
+  - service-default.yaml
+  - deployment-udn.yaml
+  - service-udn.yaml

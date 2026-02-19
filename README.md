@@ -22,45 +22,36 @@ User-Defined Networks extend the OVN-Kubernetes plugin to provide:
 
 ## Use cases
 
-Each use case has its own directory with a README (apply steps, test, cleanup). Use `oc apply -k <directory>/`; do not use `oc apply -f` on a directory. Pre-reqs are noted per use case below.
+Each use case has its own directory with a README (apply steps, test, cleanup). Use `oc apply -k <directory>/`; do not use `oc apply -f` on a directory.
 
 ---
 
 **Tenant isolation** — `use-case-tenant-isolation/`  
-One UserDefinedNetwork per namespace (e.g. tenant-a, tenant-b). Pods get UDN IPs; namespaces are isolated.  
-*Pre-req: project-admin.*
+One UserDefinedNetwork per namespace (e.g. tenant-a, tenant-b). Pods get UDN IPs; namespaces are isolated.
 
-**Cluster UDN** — `use-case-2-cluster-udn/`  
-Multi-namespace shared network with ClusterUserDefinedNetwork. Several namespaces share one CUDN and can reach each other.  
-*Pre-req: cluster-admin.*
+**Cluster UDN** — `use-case-cluster-udn/`  
+Multi-namespace shared network with ClusterUserDefinedNetwork. Several namespaces share one CUDN and can reach each other.
 
-**Layer2 vs Layer3** — `use-case-3-layer2-layer3/`  
-Layer2 and Layer3 UDN topologies in separate namespaces.  
-*Pre-req: project-admin.*
+**Layer2 vs Layer3** — `use-case-layer2-layer3/`  
+Layer2 and Layer3 UDN topologies in separate namespaces.
 
-**Overlapping pod IPs** — `use-case-4-overlapping-pod-ips/`  
-Two UDNs with the same subnet; pods in different namespaces can have the same UDN IP (e.g. 100.4.0.2 in both). No conflict—each UDN is a separate logical network.  
-*Pre-req: project-admin.*
+**Overlapping pod IPs** — `use-case-overlapping-pod-ips/`  
+Two UDNs with the same subnet; pods in different namespaces can have the same UDN IP (e.g. 100.4.0.2 in both). No conflict—each UDN is a separate logical network.
 
-**Multihoming (primary UDN + secondary UDN)** — `use-case-5-secondary-network/`  
-One primary UDN and one secondary UDN per pod; pod gets two interfaces. Optional MultiNetworkPolicy requires `useMultiNetworkPolicy` (see use-case README).  
-*Pre-req: project-admin.*
+**Multihoming (primary UDN + secondary UDN)** — `use-case-multi-homing/`  
+One primary UDN and one secondary UDN per pod; pod gets two interfaces. Optional MultiNetworkPolicy requires `useMultiNetworkPolicy` (see use-case README).
 
 **NetworkPolicy with UDN** — `use-case-network-policy-udn/`  
-One namespace on a UDN; server and client pods. NetworkPolicy allows ingress to the server only from the client pod.  
-*Pre-req: project-admin.*
+One namespace on a UDN; server and client pods. NetworkPolicy allows ingress to the server only from the client pod.
 
-**Services: default network vs UDN** — `use-case-udn-services/`  
-One namespace on the **default** network and one on a **single UDN**. Shows that Services on the default network are reachable only from default-network pods, Services on a UDN only from that UDN’s pods, and that UDN pods can still reach KAPI and DNS.  
-*Pre-req: project-admin.*
+**Services: default network vs UDN** — `use-case-services-default-vs-udn/`  
+One namespace on the **default** network and one on a **single UDN**. Shows that Services on the default network are reachable only from default-network pods, Services on a UDN only from that UDN’s pods, and that UDN pods can still reach KAPI and DNS.
 
-**Services: two UDNs (BLUE and RED)** — `use-case-8-services-in-udn/`  
-Two namespaces, each on a **different UDN** (BLUE and RED; no default network in this demo). Only pods on BLUE can reach Service blue; only pods on RED can reach Service red. Shows service isolation **between** UDNs.  
-*Pre-req: project-admin.*
+**Services: two UDNs (BLUE and RED)** — `use-case-8-services-isolated/`  
+Two namespaces, each on a **different UDN** (BLUE and RED; no default network in this demo). Only pods on BLUE can reach Service blue; only pods on RED can reach Service red. Shows service isolation **between** UDNs.
 
 **BGP integration** — `use-case-bgp-integration/`  
-Advanced: FRR on a VM, enable FRR/route-advertisement in OpenShift, UDN + FRRConfiguration + RouteAdvertisements. Cluster advertises UDN subnet to the bastion so you can reach UDN pods from the VM.  
-*Pre-req: cluster-admin, bare metal; follow the flow in the use-case README.*
+Advanced: FRR on a VM, enable FRR/route-advertisement in OpenShift, UDN + FRRConfiguration + RouteAdvertisements. Cluster advertises UDN subnet to the bastion so you can reach UDN pods from the VM.
 
 ---
 
@@ -70,13 +61,13 @@ Apply any use case (directory path as above):
 
 ```bash
 oc apply -k use-case-tenant-isolation/
-oc apply -k use-case-2-cluster-udn/
-oc apply -k use-case-3-layer2-layer3/
-oc apply -k use-case-4-overlapping-pod-ips/
-oc apply -k use-case-5-secondary-network/
+oc apply -k use-case-cluster-udn/
+oc apply -k use-case-layer2-layer3/
+oc apply -k use-case-overlapping-pod-ips/
+oc apply -k use-case-multi-homing/
 oc apply -k use-case-network-policy-udn/
-oc apply -k use-case-udn-services/
-oc apply -k use-case-8-services-in-udn/
+oc apply -k use-case-services-default-vs-udn/
+oc apply -k use-case-8-services-isolated/
 oc apply -k use-case-bgp-integration/
 ```
 

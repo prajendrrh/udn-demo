@@ -1,0 +1,12 @@
+# Services: two UDNs (BLUE and RED). Only pods on BLUE can access Service blue; only pods on RED can access Service red.
+# Use: oc apply -k use-case-8-services-isolated/  (do not use -f; order matters)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces.yaml
+  - udn-blue.yaml
+  - udn-red.yaml
+  - deployment-blue.yaml
+  - service-blue.yaml
+  - deployment-red.yaml
+  - service-red.yaml
