@@ -1,4 +1,5 @@
-# Server in same namespace as client. Listens on port 80. NetworkPolicy allows ingress only from app=client.
+# Server in same namespace as client. Listens on 8080. NetworkPolicy allows ingress only from app=client.
+# Uses same image as client so it pulls; listens with nc.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,12 +17,14 @@ spec:
     spec:
       containers:
         - name: app
-          image: nginx:alpine
+          image: quay.io/rh_ee_prajendr/ubi-minimal-nettools:latest
+          command: ["sh", "-c", "while true; do nc -l -p 8080; done"]
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
             runAsNonRoot: true
-            runAsUser: 101
             seccompProfile:
               type: RuntimeDefault

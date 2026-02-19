@@ -7,9 +7,9 @@ One namespace (**np-udn-demo**) on one UDN (100.20.0.0/24). **Server** (nginx, p
 | Resource | Purpose |
 |----------|--------|
 | **np-udn-demo** | Namespace with primary UDN (100.20.0.0/24) |
-| **Server** | nginx:alpine, listens on **port 80**, label `app=server` |
+| **Server** | Same image as client, listens on **port 8080** (nc), label `app=server` |
 | **Client** | Pod with label `app=client`; only this pod can reach the server |
-| **NetworkPolicy** `allow-server-from-client` | Allow ingress to `app=server` only from pods with `app=client`, port 80 |
+| **NetworkPolicy** `allow-server-from-client` | Allow ingress to `app=server` only from pods with `app=client`, port 8080 |
 
 ## Apply
 
@@ -34,18 +34,17 @@ Wait for pods: `oc get pods -n np-udn-demo`
    ```
    This uses the network-status annotation (UDN 100.20.0.x) when present, otherwise `status.podIP`. If `SERVER_IP` is empty, the server pod is not ready yet.
 
-3. **From client pod — TCP to server (port 80, allowed by policy):**
+3. **From client pod — TCP to server (port 8080, allowed by policy):**
    ```bash
    CLIENT=$(oc get pods -n np-udn-demo -l app=client -o json | jq -r '.items[0].metadata.name // empty')
-   oc exec -n np-udn-demo $CLIENT -- timeout 2 bash -c "echo >/dev/tcp/$SERVER_IP/80" 2>/dev/null && echo "Reachable" || echo "Timeout"
+   oc exec -n np-udn-demo $CLIENT -- timeout 2 bash -c "echo >/dev/tcp/$SERVER_IP/8080" 2>/dev/null && echo "Reachable" || echo "Timeout"
    ```
    Expected: **Reachable**.
 
-4. **Optional — from client, curl the server:**
+4. **Optional — from client, curl the server** (if the image has curl and server responded on HTTP):
    ```bash
-   oc exec -n np-udn-demo $CLIENT -- curl -s -m 2 http://$SERVER_IP/
+   oc exec -n np-udn-demo $CLIENT -- curl -s -m 2 http://$SERVER_IP:8080/ || true
    ```
-   Expected: nginx HTML (or “Reachable” if curl isn’t available).
 
 ## Cleanup
 
