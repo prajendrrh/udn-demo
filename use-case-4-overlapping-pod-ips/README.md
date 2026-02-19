@@ -1,4 +1,4 @@
-# Use Case 4: Overlapping Pod IPs
+# Overlapping pod IPs
 
 Two namespaces each have their own **UserDefinedNetwork** using the **same subnet** (`100.4.0.0/24`). Pods in `overlapping-a` and pods in `overlapping-b` can get IPs from the same range (e.g. both can have `100.4.0.2`). There is no conflict because each UDN is a separate logical network; overlapping IPs are allowed across UDNs.
 

@@ -1,4 +1,4 @@
-# Use Case 5: Multihoming (Primary UDN + Secondary UDN)
+# Multihoming (primary UDN + secondary UDN)
 
 Demonstrates **multihoming**: each pod has **two interfaces** — a **primary User-Defined Network** (UDN) and a **secondary UDN**. The namespace uses one UDN as its primary network (replacing the default cluster network), and pods attach to a second UDN via the `k8s.v1.cni.cncf.io/networks` annotation.
 

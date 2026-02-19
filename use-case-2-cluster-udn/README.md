@@ -1,4 +1,4 @@
-# Use Case 2: ClusterUserDefinedNetwork (Multi-Namespace Shared Network)
+# Cluster UDN (multi-namespace shared network)
 
 A **ClusterUserDefinedNetwork (CUDN)** is one network shared by multiple namespaces. Pods in `team-platform-dev`, `team-platform-staging`, and `team-platform-prod` all get IPs from `100.1.0.0/24` and can reach each other across namespaces.
 

@@ -1,4 +1,4 @@
-# Use case 1: Namespace-level UserDefinedNetworks (tenant isolation)
+# Namespace UDN (tenant isolation)
 # Order matters: namespaces first, then UDN CRs, then deployments.
 resources:
   - namespace.yaml

@@ -1,4 +1,4 @@
-# Use Case 3: Layer2 vs Layer3 UDN Topologies
+# Layer2 vs Layer3 UDN topologies
 
 Compare **Layer2** (single L2 segment) and **Layer3** (per-node subnets, L3 routing) User-Defined Networks.
 

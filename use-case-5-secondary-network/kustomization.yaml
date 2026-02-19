@@ -1,4 +1,4 @@
-# Use case 5: Multihoming (primary UDN + secondary UDN)
+# Multihoming (primary UDN + secondary UDN)
 # Pods have two interfaces: primary from UserDefinedNetwork (udn-primary), secondary from UserDefinedNetwork (udn-secondary) via annotation.
 resources:
   - namespace.yaml

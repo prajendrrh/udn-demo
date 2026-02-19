@@ -1,4 +1,4 @@
-# Use Case 1: Namespace-Level UDN (Tenant Isolation)
+# Namespace UDN (tenant isolation)
 
 Each namespace has its own **UserDefinedNetwork (UDN)**. Pods in tenant-a get IPs from `100.0.0.0/24`, pods in tenant-b from `200.0.0.0/24`. They are isolated from each other.
 
