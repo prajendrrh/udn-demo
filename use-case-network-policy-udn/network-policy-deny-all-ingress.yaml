@@ -1,0 +1,10 @@
+# Default deny all ingress in the namespace. Use with allow-server-from-client so only client→server is permitted.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: np-udn-demo
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
