@@ -1,0 +1,32 @@
+apiVersion: observability.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: instance
+  namespace: openshift-logging
+spec:
+  outputs:
+    - name: siem-syslog-tls
+      type: syslog
+      syslog:
+        facility: local0
+        severity: informational
+        rfc: RFC5424
+        appName: openshift
+        msgID: ocp
+        payloadKey: message
+        addLogSource: true
+        # Example destination only. Replace with your SIEM endpoint details.
+        url: "tls://siem.example.com:6514"
+      tls:
+        ca:
+          # Optional: only needed if your SIEM uses a private CA and you create a ConfigMap.
+          name: siem-ca
+  pipelines:
+    - name: forward-infra-audit-app-to-siem
+      inputRefs:
+        - infrastructure
+        - audit
+        - application
+      outputRefs:
+        - siem-syslog-tls
+
